@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.PetMapper">
+    <resultMap id="petResultMap" type="com.example.demo.entity.Pet">
+        <id property="id" column="pet_id"/>
+        <result property="name" column="pet_name"/>
+        <result property="species" column="pet_species"/>
+        <result property="uid" column="pet_uid"/>
+    </resultMap>
+</mapper>

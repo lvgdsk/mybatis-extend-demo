@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.UserMapper">
+    <resultMap id="userResultMap" type="com.example.demo.entity.User">
+        <id property="id" column="user_id"/>
+        <result property="name" column="user_name"/>
+        <result property="birthday" column="user_birthday"/>
+        <collection property="pets" ofType="com.example.demo.entity.Pet">
+            <id property="id" column="pet_id"/>
+            <result property="name" column="pet_name"/>
+            <result property="uid" column="pet_uid"/>
+            <result property="species" column="pet_species"/>
+        </collection>
+    </resultMap>
+
+    <select id="fildUser" resultType="com.example.demo.entity.User">
+        select * from user where birthday = #{birthday}
+    </select>
+</mapper>

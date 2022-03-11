@@ -1,0 +1,34 @@
+package $path$;
+
+import $path$.sqlartifact.SqlTaBle;
+
+public class Q$entity$ implements SqlTaBle {
+	private static String tableName = "$table$";
+	private String tableAlias;
+	private String columnPrefix;
+
+$fieldsDeclare$
+    public Q$entity$(String tableAlias) {
+        this(tableAlias,null);
+    }
+
+	public Q$entity$(String tableAlias,String columnPrefix) {
+	    this.tableAlias = tableAlias;
+	    this.columnPrefix = columnPrefix;$fieldInits$
+    }
+
+	@Override
+	public String getTableName() {
+		return Q$entity$.tableName;
+	}
+
+	@Override
+	public String getTableAlias() {
+		return tableAlias;
+	}
+
+    @Override
+    public String getColumnPrefix() {
+        return columnPrefix;
+    }
+}

@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: mybatis-extend-demo
+  datasource:
+    username: health
+    password: txYo71aRb
+    url: jdbc:mysql://10.16.93.81:3306/test?serverTimeZone=Asia/Shanghai
+  mvc:
+    logRequestDetails: true
+
+debug: true
+
+logging:
+  level:
+    com:
+      example:
+        demo:
+          mapper: debug
+          controller: debug
