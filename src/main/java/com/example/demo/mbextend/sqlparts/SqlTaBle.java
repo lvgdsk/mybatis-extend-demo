@@ -8,5 +8,4 @@ package com.example.demo.mbextend.sqlparts;
 public interface SqlTaBle {
     String getTableName();
     String getTableAlias();
-    String getColumnPrefix();
 }

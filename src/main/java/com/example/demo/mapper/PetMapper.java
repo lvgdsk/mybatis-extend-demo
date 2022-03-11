@@ -5,6 +5,7 @@ import com.example.demo.entity.Pet;
 import com.example.demo.mbextend.BaseSqlProvider;
 import com.example.demo.mbextend.sqlparts.SqlQuery;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.SelectProvider;
 
@@ -20,5 +21,5 @@ public interface PetMapper extends BaseMapper<Pet> {
 
     @SelectProvider(type = BaseSqlProvider.class, method = "select")
     @ResultMap("petResultMap")
-    List<Pet> select(SqlQuery sqlQuery);
+    List<Pet> select(@Param("sqlQuery") SqlQuery sqlQuery);
 }

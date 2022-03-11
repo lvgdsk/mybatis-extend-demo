@@ -23,8 +23,8 @@ public class SqlQuery implements SqlTaBle, SqlField, SqlStatement {
     // 是否是递归cte
     private boolean isRecursive = false;
     private Set<SqlField> sqlFields;
-    private String columnPrefix;
     private List<Object> params;
+    private String columnAlias;
 
     public SqlQuery(String sqlStatement,List<Object> params) {
         this.sqlStatement = sqlStatement;
@@ -41,21 +41,8 @@ public class SqlQuery implements SqlTaBle, SqlField, SqlStatement {
     }
 
     @Override
-    public String getColumnPrefix() {
-        return columnPrefix;
-    }
-
-    @Override
     public String getColumn() {
         return "(" + sqlStatement + ")";
-    }
-
-    @Override
-    public void setColumnAlias(String alias) {}
-
-    @Override
-    public String getColumnAlias() {
-        return null;
     }
 
     @Override

@@ -1,8 +1,12 @@
 package com.example.demo.mbextend.sqlparts;
 
+import com.example.demo.mbextend.enums.ConditionCombineType;
 import lombok.Data;
 
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author lvqi
@@ -11,10 +15,10 @@ import java.util.List;
  */
 @Data
 public class SqlCondition implements SqlField{
-    // 字符串是否区分大小写
-    private Boolean binary = false;
     private String condition;
-    private String alias;
+    private String columnAlias;
+    // 条件取反
+    private boolean not = false;
 
     private List<Object> params;
 
@@ -23,8 +27,14 @@ public class SqlCondition implements SqlField{
         this.params = params;
     }
 
+    // 字符串是否区分大小写
     public SqlCondition binary(){
-        this.binary = true;
+        this.condition = "binary " + this.condition;
+        return this;
+    }
+
+    public SqlCondition not(){
+        this.not = true;
         return this;
     }
 
@@ -34,26 +44,54 @@ public class SqlCondition implements SqlField{
     }
 
     @Override
-    public void setColumnAlias(String alias) {
-
-    }
-
-    @Override
-    public String getColumnAlias() {
-        return null;
-    }
-
-    @Override
     public String getQualifyField() {
-        if(binary) {
-            return "binary "+condition;
-        }else{
-            return condition;
-        }
+        return condition;
     }
 
-    @Override
-    public String getTableAlias() {
-        return null;
+    public SqlCondition and(SqlCondition ... sqlConditions){
+        combineCondition(ConditionCombineType.AND,sqlConditions);
+        return this;
+    }
+
+    public SqlCondition or(SqlCondition ... sqlConditions){
+        combineCondition(ConditionCombineType.OR,sqlConditions);
+        return this;
+    }
+
+    public SqlCondition xor(SqlCondition ... sqlConditions){
+        combineCondition(ConditionCombineType.XOR,sqlConditions);
+        return this;
+    }
+
+    private void combineCondition(ConditionCombineType combineType, SqlCondition ... sqlConditions){
+        this.condition = "( " + this.condition;
+        StringBuilder conditions = new StringBuilder();
+        switch (combineType){
+            case AND:
+                conditions.append(" and ");
+                break;
+            case OR:
+                conditions.append(" or ");
+                break;
+            case XOR:
+                conditions.append(" xor ");
+        }
+        if(sqlConditions.length>1){
+            conditions.append(" ( ");
+        }
+        conditions.append(
+                Arrays.stream(sqlConditions)
+                        .map(sc->{
+                            this.params.addAll(sc.getParams());
+                            String expr = sc.getCondition();
+                            if(sc.isNot()){
+                                expr = "not " + expr;
+                            }
+                            return expr;
+                        }).collect(Collectors.joining(" and ")));
+        if(sqlConditions.length>1){
+            conditions.append(" )");
+        }
+        this.condition = this.condition + conditions + " )";
     }
 }

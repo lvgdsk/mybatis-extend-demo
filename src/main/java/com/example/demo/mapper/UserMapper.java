@@ -25,11 +25,11 @@ public interface UserMapper extends BaseMapper<User> {
 
     @UpdateProvider(type = BaseSqlProvider.class, method = "update")
     @ResultType(Integer.class)
-    Integer update(SqlUpdate sqlUpdate);
+    Integer update(@Param("sqlUpdate")SqlUpdate sqlUpdate);
 
     @UpdateProvider(type = BaseSqlProvider.class, method = "delete")
     @ResultType(Integer.class)
-    Integer delete(SqlDelete sqlDelete);
+    Integer delete(@Param("sqlDelete") SqlDelete sqlDelete);
 
     List<User> fildUser(@Param("birthday") Date birthday);
 

@@ -5,6 +5,7 @@ import com.example.demo.entity.Employee;
 import com.example.demo.mbextend.BaseSqlProvider;
 import com.example.demo.mbextend.sqlparts.SqlQuery;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.SelectProvider;
 
@@ -19,5 +20,5 @@ import java.util.List;
 public interface EmployeeMapper extends BaseMapper<Employee> {
     @SelectProvider(type = BaseSqlProvider.class, method = "select")
     @ResultMap("employeeResultMap")
-    List<Employee> select(SqlQuery sqlQuery);
+    List<Employee> select(@Param("sqlQuery") SqlQuery sqlQuery);
 }

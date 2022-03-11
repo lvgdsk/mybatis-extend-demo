@@ -14,14 +14,10 @@ import java.util.List;
 public interface SqlField {
     /** 获取表字段名 */
     String getColumn();
-    /** 设置表字段别名 */
-    void setColumnAlias(String alias);
     /** 获取表字段别名 */
     String getColumnAlias();
     /** 获取限定表字段名,形式为:[表别名_表字段名] */
     String getQualifyField();
-    /** 获取表别名 */
-    String getTableAlias();
     List<Object> getParams();
 
     default SqlCondition isNull(){

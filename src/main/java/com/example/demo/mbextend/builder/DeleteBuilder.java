@@ -1,8 +1,13 @@
 package com.example.demo.mbextend.builder;
 
-import com.example.demo.mbextend.enums.ConditionCombineType;
-import com.example.demo.mbextend.sqlparts.*;
+import com.example.demo.mbextend.sqlparts.SqlCondition;
+import com.example.demo.mbextend.sqlparts.SqlDelete;
+import com.example.demo.mbextend.sqlparts.SqlTaBle;
 import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author lvqi
@@ -13,7 +18,7 @@ import lombok.Data;
 @Data
 public class DeleteBuilder {
     private SqlTaBle sqlTaBle;
-    private SqlWhere sqlWhere;
+    private List<SqlCondition> sqlWhere;
 
     private DeleteBuilder(SqlTaBle sqlTaBle) {
         this.sqlTaBle = sqlTaBle;
@@ -23,31 +28,8 @@ public class DeleteBuilder {
         return new DeleteBuilder(sqlTaBle);
     }
 
-    public DeleteBuilder where(SqlWhere sqlWhere){
-        this.sqlWhere = sqlWhere;
-        return this;
-    }
-
     public DeleteBuilder where(SqlCondition... sqlCondition){
-        this.sqlWhere = SqlWhere.custom(sqlCondition);
-        return this;
-    }
-
-    public DeleteBuilder and(SqlCondition ... sqlCondition){
-        SqlWhere sqlWhere = SqlWhere.custom(sqlCondition);
-        this.sqlWhere.addSqlWhere(sqlWhere, ConditionCombineType.AND);
-        return this;
-    }
-
-    public DeleteBuilder or(SqlCondition ... sqlCondition){
-        SqlWhere sqlWhere = SqlWhere.custom(sqlCondition);
-        this.sqlWhere.addSqlWhere(sqlWhere,ConditionCombineType.OR);
-        return this;
-    }
-
-    public DeleteBuilder xor(SqlCondition ... sqlCondition){
-        SqlWhere sqlWhere = SqlWhere.custom(sqlCondition);
-        this.sqlWhere.addSqlWhere(sqlWhere,ConditionCombineType.XOR);
+        this.sqlWhere = new ArrayList<>(Arrays.asList(sqlCondition));
         return this;
     }
 

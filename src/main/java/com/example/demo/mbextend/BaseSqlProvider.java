@@ -26,23 +26,23 @@ public class BaseSqlProvider {
 
     /** 构建select sql语句 */
     public static String select(SqlQuery sqlQuery){
-        return fillParams(sqlQuery.getFinalSqlStatement(),sqlQuery.getParams());
+        return fillParams(sqlQuery.getFinalSqlStatement(),sqlQuery.getParams(),"sqlQuery");
     }
 
     /** 构建update sql语句 */
     public static String update(SqlUpdate sqlUpdate){
-        return fillParams(sqlUpdate.getSqlStatement(),sqlUpdate.getParams());
+        return fillParams(sqlUpdate.getSqlStatement(),sqlUpdate.getParams(),"sqlUpdate");
     }
 
 
     /** 构建delete sql语句 */
     public static String delete(SqlDelete sqlDelete){
-        return fillParams(sqlDelete.getSqlStatement(),sqlDelete.getParams());
+        return fillParams(sqlDelete.getSqlStatement(),sqlDelete.getParams(),"sqlDelete");
     }
 
-    private static String fillParams(String sqlStatement,List<Object> params){
+    private static String fillParams(String sqlStatement,List<Object> params,String paramName){
         for (int i = 0; i <params.size(); i++) {
-            sqlStatement = sqlStatement.replaceFirst("\\$\\{param}",String.format("#{sqlQuery.params[%d]}",i));
+            sqlStatement = sqlStatement.replaceFirst("\\$\\{param}",String.format("#{%s.params[%d]}",paramName,i));
         }
         if(logger.isDebugEnabled()) {
             // 打印 sql 语句

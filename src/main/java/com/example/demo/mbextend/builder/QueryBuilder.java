@@ -1,7 +1,6 @@
 package com.example.demo.mbextend.builder;
 
 import com.example.demo.mbextend.QField;
-import com.example.demo.mbextend.enums.ConditionCombineType;
 import com.example.demo.mbextend.enums.JoinType;
 import com.example.demo.mbextend.sqlparts.*;
 import lombok.Data;
@@ -21,10 +20,10 @@ public class QueryBuilder {
 
     private List<FromTable> sqlFromTables;
     private List<SqlField> sqlSelectFields;
-    private SqlWhere sqlWhere;
+    private List<SqlCondition> sqlWhere;
     private List<OrderItem> sqlOrders;
     private List<GroupItem> sqlGroups;
-    private SqlWhere sqlHaving;
+    private List<SqlCondition> sqlHaving;
     private boolean distinct;
     private Integer selectCount;
     private Integer selectOffset;
@@ -104,31 +103,8 @@ public class QueryBuilder {
         return this;
     }
 
-    public QueryBuilder where(SqlWhere sqlWhere){
-        this.sqlWhere = sqlWhere;
-        return this;
-    }
-
     public QueryBuilder where(SqlCondition ... sqlCondition){
-        this.sqlWhere = SqlWhere.custom(sqlCondition);
-        return this;
-    }
-
-    public QueryBuilder and(SqlCondition ... sqlCondition){
-        SqlWhere sqlWhere = SqlWhere.custom(sqlCondition);
-        this.sqlWhere.addSqlWhere(sqlWhere, ConditionCombineType.AND);
-        return this;
-    }
-
-    public QueryBuilder or(SqlCondition ... sqlCondition){
-        SqlWhere sqlWhere = SqlWhere.custom(sqlCondition);
-        this.sqlWhere.addSqlWhere(sqlWhere,ConditionCombineType.OR);
-        return this;
-    }
-
-    public QueryBuilder xor(SqlCondition ... sqlCondition){
-        SqlWhere sqlWhere = SqlWhere.custom(sqlCondition);
-        this.sqlWhere.addSqlWhere(sqlWhere,ConditionCombineType.XOR);
+        this.sqlWhere = new ArrayList<>(Arrays.asList(sqlCondition));
         return this;
     }
 
@@ -160,31 +136,8 @@ public class QueryBuilder {
         return this;
     }
 
-    public QueryBuilder having(SqlWhere sqlWhere){
-        this.sqlHaving = sqlWhere;
-        return this;
-    }
-
     public QueryBuilder having(SqlCondition ... sqlCondition){
-        this.sqlHaving = SqlWhere.custom(sqlCondition);
-        return this;
-    }
-
-    public QueryBuilder havingAnd(SqlCondition ... sqlCondition){
-        SqlWhere sqlWhere = SqlWhere.custom(sqlCondition);
-        this.sqlHaving.addSqlWhere(sqlWhere,ConditionCombineType.AND);
-        return this;
-    }
-
-    public QueryBuilder havingOr(SqlCondition ... sqlCondition){
-        SqlWhere sqlWhere = SqlWhere.custom(sqlCondition);
-        this.sqlHaving.addSqlWhere(sqlWhere,ConditionCombineType.OR);
-        return this;
-    }
-
-    public QueryBuilder havingXor(SqlCondition ... sqlCondition){
-        SqlWhere sqlWhere = SqlWhere.custom(sqlCondition);
-        this.sqlHaving.addSqlWhere(sqlWhere,ConditionCombineType.XOR);
+        this.sqlHaving = new ArrayList<>(Arrays.asList(sqlCondition));
         return this;
     }
 

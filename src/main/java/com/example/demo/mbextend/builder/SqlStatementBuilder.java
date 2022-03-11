@@ -1,13 +1,9 @@
 package com.example.demo.mbextend.builder;
 
-import com.example.demo.mbextend.builder.DeleteBuilder;
-import com.example.demo.mbextend.builder.QueryBuilder;
-import com.example.demo.mbextend.builder.UpdateBuilder;
 import com.example.demo.mbextend.sqlparts.*;
 
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -26,11 +22,11 @@ public class SqlStatementBuilder {
         // 构建from子句
         buildFrom(builder, queryBuilder.getSqlFromTables(),params);
         // 构建where子句
-        buildWhere(builder, queryBuilder.getSqlWhere(),true,params);
+        buildWhere(builder, queryBuilder.getSqlWhere(),params);
         // 构建group by子句
         buildGroupBy(builder, queryBuilder.getSqlGroups(),params);
         // 构建having子句
-        buildWhere(builder, queryBuilder.getSqlHaving(),true,params);
+        buildWhere(builder, queryBuilder.getSqlHaving(),params);
         // 构建order by
         buildOrderBy(builder, queryBuilder.getSqlOrders(),params);
         // 构建limit子句
@@ -100,87 +96,47 @@ public class SqlStatementBuilder {
             if(sqlTaBle instanceof SqlQuery){
                 params.addAll(((SqlQuery)sqlTaBle).getParams());
             }
-            builder.append(table.getSqlTaBle().getTableName())
-                    .append(" as ")
-                    .append(table.getSqlTaBle().getTableAlias())
-                    .append(" ");
+            builder.append(table.getSqlTaBle().getTableName());
+            if(table.getSqlTaBle().getTableAlias()!=null){
+                builder.append(" as ").append(table.getSqlTaBle().getTableAlias());
+            }
+            builder.append(" ");
             if(table.getJoinType()!=null){
                 params.addAll(table.getSqlCondition().getParams());
-                builder.append(" on ")
-                        .append(table.getSqlCondition().getCondition());
+                builder.append(" on ");
+                if(table.getSqlCondition().isNot()){
+                    builder.append(" not ");
+                }
+                builder.append(table.getSqlCondition().getCondition());
             }
         });
     }
 
     /** 构建where子句 */
-    private static void buildWhere(StringBuilder builder, SqlWhere sqlWhere, boolean alias, List<Object> params){
-        if(sqlWhere!=null) {
-            builder.append(" where ");
-            buildWhereItem(builder, sqlWhere, alias,params);
-            List<SqlWhere> sqlWheres = sqlWhere.getSqlWheres();
-            if(sqlWheres!=null) {
-                sqlWheres.forEach(where -> {
-                    builder.append(where.getCombineType().getSymbol())
-                            .append(" ( ");
-                    buildWhereItem(builder, where, alias ,params);
-                    builder.append(" ) ");
-                });
-            }
-        }
-    }
-
-    /** 构建where子句的子项 */
-    private static void buildWhereItem(StringBuilder builder,SqlWhere sqlWhere,boolean alias,List<Object> params){
-        Iterator<SqlCondition> iterator = sqlWhere.getSqlCondition().iterator();
-        while(iterator.hasNext()){
-            SqlCondition condition = iterator.next();
-            if (condition.getBinary()) {
-                builder.append(" binary ");
-            }
-            params.addAll(condition.getParams());
-            String conditionExpr = condition.getCondition();
-            // delete语句不能使用表别名，去掉表达式里的表别名前缀,除子查询外
-            if(!alias){
-                if(conditionExpr.contains("select")){
-                    Map<Integer,String> subSelects = new HashMap<>(1);
-                    int index=1;
-                    while (true) {
-                        int selectIndex = conditionExpr.indexOf("select");
-                        if(selectIndex==-1){
-                            break;
-                        }
-                        int firstStart = conditionExpr.lastIndexOf('(', selectIndex);
-                        int firstEnd = conditionExpr.indexOf(')', firstStart);
-                        String substring = conditionExpr.substring(firstStart + 1, firstEnd);
-                        Pattern pattern = Pattern.compile("\\(");
-                        Matcher matcher = pattern.matcher(substring);
-                        int count = 0;
-                        while (matcher.find()) {
-                            count++;
-                        }
-                        int lastEnd = firstEnd;
-                        for (int i = 0; i < count; i++) {
-                            lastEnd = conditionExpr.indexOf(')', lastEnd + 1);
-                        }
-                        String subSelect = conditionExpr.substring(firstStart, lastEnd + 1);
-                        StringBuilder builder1 = new StringBuilder(conditionExpr);
-                        conditionExpr = builder1.replace(firstStart, lastEnd + 1,"${"+index+"}").toString();
-                        subSelects.put(index,subSelect);
-                        index++;
+    private static void buildWhere(StringBuilder builder, List<SqlCondition> sqlConditions, List<Object> params){
+//        if(sqlWhere!=null) {
+//            builder.append(" where ");
+//            buildWhereItem(builder, sqlWhere, alias,params);
+//            List<SqlWhere> sqlWheres = sqlWhere.getSqlWheres();
+//            if(sqlWheres!=null) {
+//                sqlWheres.forEach(where -> {
+//                    builder.append(where.getCombineType().getSymbol())
+//                            .append(" ( ");
+//                    buildWhereItem(builder, where, alias ,params);
+//                    builder.append(" ) ");
+//                });
+//            }
+//        }
+        if(sqlConditions!=null && !sqlConditions.isEmpty()){
+            builder.append(" where ").append(
+                sqlConditions.stream().map(sc->{
+                    params.addAll(sc.getParams());
+                    String expr = sc.getCondition();
+                    if(sc.isNot()){
+                        expr = "not " + expr;
                     }
-                    conditionExpr = conditionExpr.replaceAll("\\w+\\.","");
-                    for(Map.Entry<Integer, String> entry : subSelects.entrySet()){
-                        conditionExpr = conditionExpr.replace("${" + entry.getKey() + "}", entry.getValue());
-                    }
-                }else {
-                    conditionExpr = conditionExpr.replaceAll("\\w+\\.", "");
-                }
-            }
-
-            builder.append(conditionExpr);
-            if(iterator.hasNext()) {
-                builder.append(" and ");
-            }
+                    return expr;
+                }).collect(Collectors.joining(" and ")));
         }
     }
 
@@ -243,7 +199,7 @@ public class SqlStatementBuilder {
         // 构建set子句
         buildSet(builder, updateBuilder,params);
         // 构建where子句
-        buildWhere(builder, updateBuilder.getSqlWhere(),true,params);
+        buildWhere(builder, updateBuilder.getSqlWhere(),params);
         return new SqlUpdate(builder.toString(),params);
     }
 
@@ -261,7 +217,7 @@ public class SqlStatementBuilder {
         builder.append("delete from ")
                 .append(deleteBuilder.getSqlTaBle().getTableName());
         // 构建where子句
-        buildWhere(builder, deleteBuilder.getSqlWhere(),false,params);
+        buildWhere(builder, deleteBuilder.getSqlWhere(),params);
         return new SqlDelete(builder.toString(),params);
     }
 }

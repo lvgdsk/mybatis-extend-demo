@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -56,15 +57,20 @@ public class EntityMarkGenerator {
                 tableName = tableNameAnno.value();
             }
             String markTemplate;
+            Path filePath = Paths.get(extendPath + "/generator/MarkTemplate.txt");
             try {
-                List<String> lines = Files.readAllLines(Paths.get(extendPath+"/generator/MarkTemplate.txt"), StandardCharsets.UTF_8);
+                List<String> lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
                 markTemplate = String.join("\n", lines);
                 markTemplate = markTemplate.replaceAll("\\$path\\$", mbextend.replaceAll("/", "."));
                 markTemplate = markTemplate.replaceAll("\\$entity\\$", tClass.getSimpleName());
                 markTemplate = markTemplate.replaceAll("\\$table\\$", tableName);
                 StringBuilder fieldsDeclare = new StringBuilder();
                 StringBuilder fieldInits = new StringBuilder();
-                List<Field> fields = Arrays.asList(tClass.getDeclaredFields());
+                List<Field> fields = new ArrayList<>(Arrays.asList(tClass.getDeclaredFields()));
+                Class<?> superclass = tClass.getSuperclass();
+                if(superclass!=null) {
+                    fields.addAll(Arrays.asList(superclass.getDeclaredFields()));
+                }
                 fields.forEach(f->{
                     TableField annotation = f.getAnnotation(TableField.class);
                     if(annotation==null || annotation.exist()) {
@@ -81,7 +87,7 @@ public class EntityMarkGenerator {
                 markTemplate = markTemplate.replaceAll("\\$fieldsDeclare\\$", fieldsDeclare.toString());
                 markTemplate = markTemplate.replaceAll("\\$fieldInits\\$", fieldInits.toString());
             } catch (IOException e) {
-                log.error("文件：{}，读取失败",extendPath,e);
+                log.error("文件：{}，读取失败",filePath.toAbsolutePath(),e);
                 return;
             }
 

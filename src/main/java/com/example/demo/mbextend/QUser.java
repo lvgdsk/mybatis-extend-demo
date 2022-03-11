@@ -5,7 +5,6 @@ import com.example.demo.mbextend.sqlparts.SqlTaBle;
 public class QUser implements SqlTaBle {
 	private static String tableName = "user";
 	private String tableAlias;
-	private String columnPrefix;
 
 	public QField id;
 	public QField name;
@@ -17,7 +16,6 @@ public class QUser implements SqlTaBle {
 
 	public QUser(String tableAlias,String columnPrefix) {
 	    this.tableAlias = tableAlias;
-	    this.columnPrefix = columnPrefix;
 		this.id = new QField(tableAlias,"id",null,columnPrefix);
 		this.name = new QField(tableAlias,"name",null,columnPrefix);
 		this.birthday = new QField(tableAlias,"birthday",null,columnPrefix);
@@ -32,9 +30,4 @@ public class QUser implements SqlTaBle {
 	public String getTableAlias() {
 		return tableAlias;
 	}
-
-    @Override
-    public String getColumnPrefix() {
-        return columnPrefix;
-    }
 }

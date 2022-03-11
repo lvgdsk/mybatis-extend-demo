@@ -101,7 +101,9 @@ public class AppController {
         SqlQuery sqlQuery = SqlBuilder.query(user)
                 .leftjoin(pet, pet.uid.eq(user.id))
                 .select(user)
-                .select(pet.name, pet.species).build();
+                .select(pet.name, pet.species)
+                .where(user.id.eq(1),user.name.eq("kkgdsk").and(pet.species.eq("猫").not().and(pet.species.eq("鸟"))))
+                .build();
 
         return userService.select(sqlQuery);
     }
@@ -160,7 +162,7 @@ public class AppController {
 
     @GetMapping("/delete1")
     private Integer delete1() {
-        QUser user = new QUser("u");
+        QUser user = new QUser(null);
         QPet pet = new QPet("p");
         SqlQuery sqlQuery = SqlBuilder.query(pet)
                 .select(pet.uid)

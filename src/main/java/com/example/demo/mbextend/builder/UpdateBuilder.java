@@ -1,15 +1,11 @@
 package com.example.demo.mbextend.builder;
 
 import com.example.demo.mbextend.QField;
-import com.example.demo.mbextend.enums.ConditionCombineType;
 import com.example.demo.mbextend.enums.JoinType;
 import com.example.demo.mbextend.sqlparts.*;
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author lvqi
@@ -21,7 +17,7 @@ import java.util.Set;
 public class UpdateBuilder {
     private List<FromTable> sqlFromTables;
     private Set<String> sqlSets;
-    private SqlWhere sqlWhere;
+    private List<SqlCondition> sqlWhere;
     List<Object> params;
 
     private UpdateBuilder(SqlTaBle sqlTaBle) {
@@ -57,31 +53,8 @@ public class UpdateBuilder {
         return this;
     }
 
-    public UpdateBuilder where(SqlWhere sqlWhere){
-        this.sqlWhere = sqlWhere;
-        return this;
-    }
-
     public UpdateBuilder where(SqlCondition ... sqlCondition){
-        this.sqlWhere = SqlWhere.custom(sqlCondition);
-        return this;
-    }
-
-    public UpdateBuilder and(SqlCondition ... sqlCondition){
-        SqlWhere sqlWhere = SqlWhere.custom(sqlCondition);
-        this.sqlWhere.addSqlWhere(sqlWhere, ConditionCombineType.AND);
-        return this;
-    }
-
-    public UpdateBuilder or(SqlCondition ... sqlCondition){
-        SqlWhere sqlWhere = SqlWhere.custom(sqlCondition);
-        this.sqlWhere.addSqlWhere(sqlWhere,ConditionCombineType.OR);
-        return this;
-    }
-
-    public UpdateBuilder xor(SqlCondition ... sqlCondition){
-        SqlWhere sqlWhere = SqlWhere.custom(sqlCondition);
-        this.sqlWhere.addSqlWhere(sqlWhere,ConditionCombineType.XOR);
+        this.sqlWhere = new ArrayList<>(Arrays.asList(sqlCondition));
         return this;
     }
 

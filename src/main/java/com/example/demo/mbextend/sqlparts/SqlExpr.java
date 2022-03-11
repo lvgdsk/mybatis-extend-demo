@@ -28,11 +28,6 @@ public class SqlExpr implements SqlField {
         return sqlExpr;
     }
 
-    @Override
-    public String getTableAlias() {
-        return null;
-    }
-
     /** 数学计算 */
     /** 加法 */
     public static SqlExpr add(Object param1,Object param2){
