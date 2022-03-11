@@ -1,8 +1,9 @@
-package com.example.demo.mbextend.sqlparts;
+package com.example.demo.mbextend.builder;
 
 import com.example.demo.mbextend.builder.DeleteBuilder;
 import com.example.demo.mbextend.builder.QueryBuilder;
 import com.example.demo.mbextend.builder.UpdateBuilder;
+import com.example.demo.mbextend.sqlparts.*;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -40,11 +41,10 @@ public class SqlStatementBuilder {
         SqlQuery sqlQuery = new SqlQuery(builder.toString(),params);
         sqlQuery.setCteStatement(cteStatement);
 
-        System.out.println(builder);
         return sqlQuery;
     }
 
-    private static String buildCte(List<FromTable> sqlFromTables,List<Object> params){
+    private static String buildCte(List<FromTable> sqlFromTables, List<Object> params){
         List<SqlQuery> ctes = sqlFromTables.stream().filter(sft -> {
             SqlTaBle sqlTaBle = sft.getSqlTaBle();
             return sqlTaBle instanceof SqlQuery && ((SqlQuery) sqlTaBle).isCte();
@@ -67,7 +67,7 @@ public class SqlStatementBuilder {
     }
 
     /** 构建select子句 */
-    private static void buildSelect(StringBuilder builder, List<SqlField> sqlSelectFields, boolean distinct,List<Object> params){
+    private static void buildSelect(StringBuilder builder, List<SqlField> sqlSelectFields, boolean distinct, List<Object> params){
         builder.append("select ");
         if(distinct){
             builder.append("distinct ");
@@ -113,7 +113,7 @@ public class SqlStatementBuilder {
     }
 
     /** 构建where子句 */
-    private static void buildWhere(StringBuilder builder, SqlWhere sqlWhere, boolean alias,List<Object> params){
+    private static void buildWhere(StringBuilder builder, SqlWhere sqlWhere, boolean alias, List<Object> params){
         if(sqlWhere!=null) {
             builder.append(" where ");
             buildWhereItem(builder, sqlWhere, alias,params);
@@ -244,7 +244,6 @@ public class SqlStatementBuilder {
         buildSet(builder, updateBuilder,params);
         // 构建where子句
         buildWhere(builder, updateBuilder.getSqlWhere(),true,params);
-        System.out.println(builder);
         return new SqlUpdate(builder.toString(),params);
     }
 
@@ -263,7 +262,6 @@ public class SqlStatementBuilder {
                 .append(deleteBuilder.getSqlTaBle().getTableName());
         // 构建where子句
         buildWhere(builder, deleteBuilder.getSqlWhere(),false,params);
-        System.out.println(builder);
         return new SqlDelete(builder.toString(),params);
     }
 }

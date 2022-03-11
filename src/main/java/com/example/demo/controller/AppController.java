@@ -108,7 +108,7 @@ public class AppController {
 
     @GetMapping("/select1")
     private List<User> select1(){
-        long start = System.currentTimeMillis();
+
         QUser user = new QUser("u","user");
         QPet pet = new QPet("p","pet");
         SqlQuery sqlQuery = SqlBuilder
@@ -117,7 +117,6 @@ public class AppController {
 //                .select(pet.id,SqlExpr.caseCondition(pet.name,pet.id.eq(2),"aa",pet.id.eq(3),"bb","cc"))
                 .select(pet.id,SqlExpr.caseSwitch(pet.name,pet.id,2,"aa",3,"bb","cc"))
                 .where(SqlExpr.dateAdd(user.birthday,2, TimeField.DAY).eq(getDate("2022-02-18 14:00:00"))).build();
-        System.out.println(System.currentTimeMillis()-start);
         return userService.select(sqlQuery);
     }
 

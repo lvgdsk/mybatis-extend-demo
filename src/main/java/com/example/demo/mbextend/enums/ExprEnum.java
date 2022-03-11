@@ -4,6 +4,7 @@ package com.example.demo.mbextend.enums;
  * @author lvqi
  * @version 1.0.0
  * @since 2022/2/18 17:28
+ * 表达式
  */
 public enum ExprEnum {
     /** 字符串函数 */

@@ -2,7 +2,7 @@ package com.example.demo.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.demo.entity.Pet;
-import com.example.demo.mbextend.BaseSqlBuilder;
+import com.example.demo.mbextend.BaseSqlProvider;
 import com.example.demo.mbextend.sqlparts.SqlQuery;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.ResultMap;
@@ -18,7 +18,7 @@ import java.util.List;
 @Mapper
 public interface PetMapper extends BaseMapper<Pet> {
 
-    @SelectProvider(type = BaseSqlBuilder.class, method = "select")
+    @SelectProvider(type = BaseSqlProvider.class, method = "select")
     @ResultMap("petResultMap")
     List<Pet> select(SqlQuery sqlQuery);
 }

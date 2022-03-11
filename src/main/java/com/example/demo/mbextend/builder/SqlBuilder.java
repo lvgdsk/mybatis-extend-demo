@@ -9,7 +9,7 @@ import com.example.demo.mbextend.sqlparts.SqlTaBle;
  */
 public class SqlBuilder {
 
-    public  static QueryBuilder query(SqlTaBle sqlTaBle) {return QueryBuilder.from(sqlTaBle);}
+    public static QueryBuilder query(SqlTaBle sqlTaBle) {return QueryBuilder.from(sqlTaBle);}
 
     public static UpdateBuilder update(SqlTaBle sqlTaBle){
         return UpdateBuilder.update(sqlTaBle);

@@ -2,7 +2,7 @@ package com.example.demo.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.demo.entity.User;
-import com.example.demo.mbextend.BaseSqlBuilder;
+import com.example.demo.mbextend.BaseSqlProvider;
 import com.example.demo.mbextend.sqlparts.SqlDelete;
 import com.example.demo.mbextend.sqlparts.SqlQuery;
 import com.example.demo.mbextend.sqlparts.SqlUpdate;
@@ -19,15 +19,15 @@ import java.util.List;
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
 
-    @SelectProvider(type = BaseSqlBuilder.class, method = "select")
+    @SelectProvider(type = BaseSqlProvider.class, method = "select")
     @ResultMap("userResultMap")
     List<User> select(@Param("sqlQuery") SqlQuery sqlQuery);
 
-    @UpdateProvider(type = BaseSqlBuilder.class, method = "update")
+    @UpdateProvider(type = BaseSqlProvider.class, method = "update")
     @ResultType(Integer.class)
     Integer update(SqlUpdate sqlUpdate);
 
-    @UpdateProvider(type = BaseSqlBuilder.class, method = "delete")
+    @UpdateProvider(type = BaseSqlProvider.class, method = "delete")
     @ResultType(Integer.class)
     Integer delete(SqlDelete sqlDelete);
 

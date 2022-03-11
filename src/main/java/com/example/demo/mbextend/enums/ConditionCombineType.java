@@ -4,6 +4,7 @@ package com.example.demo.mbextend.enums;
  * @author lvqi
  * @version 1.0.0
  * @since 2022/2/18 14:37
+ * 逻辑关系
  */
 public enum ConditionCombineType {
     AND(" and "),
