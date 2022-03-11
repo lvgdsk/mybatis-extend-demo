@@ -1,6 +1,6 @@
 package com.example.demo.mbextend;
 
-import com.example.demo.mbextend.sqlartifact.SqlTaBle;
+import com.example.demo.mbextend.sqlparts.SqlTaBle;
 
 public class QPet implements SqlTaBle {
 	private static String tableName = "pet";

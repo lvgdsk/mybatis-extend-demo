@@ -3,7 +3,7 @@ package com.example.demo.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.demo.entity.Employee;
 import com.example.demo.mbextend.BaseSqlBuilder;
-import com.example.demo.mbextend.sqlartifact.SqlQuery;
+import com.example.demo.mbextend.sqlparts.SqlQuery;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.SelectProvider;

@@ -2,7 +2,7 @@ package com.example.demo.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.demo.entity.Pet;
-import com.example.demo.mbextend.sqlartifact.SqlQuery;
+import com.example.demo.mbextend.sqlparts.SqlQuery;
 
 import java.util.List;
 

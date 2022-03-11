@@ -1,8 +1,8 @@
 package com.example.demo.mbextend;
 
-import com.example.demo.mbextend.sqlartifact.SqlDelete;
-import com.example.demo.mbextend.sqlartifact.SqlQuery;
-import com.example.demo.mbextend.sqlartifact.SqlUpdate;
+import com.example.demo.mbextend.sqlparts.SqlDelete;
+import com.example.demo.mbextend.sqlparts.SqlQuery;
+import com.example.demo.mbextend.sqlparts.SqlUpdate;
 
 
 import java.text.SimpleDateFormat;

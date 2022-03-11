@@ -8,7 +8,7 @@ import com.example.demo.mbextend.QField;
 import com.example.demo.mbextend.QPet;
 import com.example.demo.mbextend.QUser;
 import com.example.demo.mbextend.builder.SqlBuilder;
-import com.example.demo.mbextend.sqlartifact.*;
+import com.example.demo.mbextend.sqlparts.*;
 import com.example.demo.mapper.UserMapper;
 import com.example.demo.service.EmployeeService;
 import com.example.demo.service.PetService;

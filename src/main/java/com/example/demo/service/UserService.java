@@ -2,9 +2,9 @@ package com.example.demo.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.demo.entity.User;
-import com.example.demo.mbextend.sqlartifact.SqlDelete;
-import com.example.demo.mbextend.sqlartifact.SqlQuery;
-import com.example.demo.mbextend.sqlartifact.SqlUpdate;
+import com.example.demo.mbextend.sqlparts.SqlDelete;
+import com.example.demo.mbextend.sqlparts.SqlQuery;
+import com.example.demo.mbextend.sqlparts.SqlUpdate;
 
 import java.util.List;
 

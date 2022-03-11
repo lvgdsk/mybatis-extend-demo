@@ -2,7 +2,7 @@ package com.example.demo.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.demo.entity.Employee;
-import com.example.demo.mbextend.sqlartifact.SqlQuery;
+import com.example.demo.mbextend.sqlparts.SqlQuery;
 import com.example.demo.mapper.EmployeeMapper;
 import com.example.demo.service.EmployeeService;
 import org.springframework.stereotype.Service;

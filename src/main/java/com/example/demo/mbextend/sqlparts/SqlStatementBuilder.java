@@ -1,4 +1,4 @@
-package com.example.demo.mbextend.sqlartifact;
+package com.example.demo.mbextend.sqlparts;
 
 import com.example.demo.mbextend.builder.DeleteBuilder;
 import com.example.demo.mbextend.builder.QueryBuilder;

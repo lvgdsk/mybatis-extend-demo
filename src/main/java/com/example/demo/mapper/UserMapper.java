@@ -3,9 +3,9 @@ package com.example.demo.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.demo.entity.User;
 import com.example.demo.mbextend.BaseSqlBuilder;
-import com.example.demo.mbextend.sqlartifact.SqlDelete;
-import com.example.demo.mbextend.sqlartifact.SqlQuery;
-import com.example.demo.mbextend.sqlartifact.SqlUpdate;
+import com.example.demo.mbextend.sqlparts.SqlDelete;
+import com.example.demo.mbextend.sqlparts.SqlQuery;
+import com.example.demo.mbextend.sqlparts.SqlUpdate;
 import org.apache.ibatis.annotations.*;
 
 import java.util.Date;

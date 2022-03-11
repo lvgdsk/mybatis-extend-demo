@@ -1,6 +1,6 @@
 package com.example.demo.mbextend.builder;
 
-import com.example.demo.mbextend.sqlartifact.*;
+import com.example.demo.mbextend.sqlparts.*;
 import lombok.Data;
 
 /**

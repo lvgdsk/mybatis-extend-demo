@@ -1,4 +1,4 @@
-package com.example.demo.mbextend.sqlartifact;
+package com.example.demo.mbextend.sqlparts;
 
 import java.util.List;
 

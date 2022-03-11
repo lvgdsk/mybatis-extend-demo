@@ -1,6 +1,6 @@
 package com.example.demo.mbextend;
 
-import com.example.demo.mbextend.sqlartifact.SqlField;
+import com.example.demo.mbextend.sqlparts.SqlField;
 import lombok.Data;
 
 import java.util.ArrayList;
