@@ -2,6 +2,7 @@ package com.example.demo.mbextend.sqlparts;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import com.example.demo.mbextend.enums.ExprEnum;
 
 import java.util.List;
 

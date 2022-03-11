@@ -1,10 +1,15 @@
 package com.example.demo.mbextend.builder;
 
 import com.example.demo.mbextend.QField;
+import com.example.demo.mbextend.enums.ConditionCombineType;
+import com.example.demo.mbextend.enums.JoinType;
 import com.example.demo.mbextend.sqlparts.*;
 import lombok.Data;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author lvqi

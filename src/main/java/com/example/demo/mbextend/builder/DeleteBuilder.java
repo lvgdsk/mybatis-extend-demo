@@ -1,5 +1,6 @@
 package com.example.demo.mbextend.builder;
 
+import com.example.demo.mbextend.enums.ConditionCombineType;
 import com.example.demo.mbextend.sqlparts.*;
 import lombok.Data;
 

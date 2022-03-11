@@ -1,9 +1,14 @@
 package com.example.demo.mbextend.sqlparts;
 
-import com.example.demo.mbextend.*;
+import com.example.demo.mbextend.QField;
+import com.example.demo.mbextend.enums.ExprEnum;
+import com.example.demo.mbextend.enums.SqlOperator;
+import com.example.demo.mbextend.enums.TimeField;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -122,7 +127,7 @@ public class SqlExprBuilder {
     }
 
     /** 构建比较表达式 */
-    public static SqlCondition buildCompareExpr(SqlField sqlField,SqlOperator sqlOperator,Object param){
+    public static SqlCondition buildCompareExpr(SqlField sqlField, SqlOperator sqlOperator, Object param){
         List<Object> params = new ArrayList<>(10);
         params.addAll(sqlField.getParams());
 

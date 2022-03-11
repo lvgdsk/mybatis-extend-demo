@@ -1,4 +1,4 @@
-package com.example.demo.mbextend.sqlparts;
+package com.example.demo.mbextend.enums;
 
 /**
  * @author lvqi

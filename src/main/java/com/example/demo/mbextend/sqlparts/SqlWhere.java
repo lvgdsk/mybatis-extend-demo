@@ -1,5 +1,6 @@
 package com.example.demo.mbextend.sqlparts;
 
+import com.example.demo.mbextend.enums.ConditionCombineType;
 import lombok.Data;
 
 import java.util.ArrayList;

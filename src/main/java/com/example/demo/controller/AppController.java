@@ -3,13 +3,14 @@ package com.example.demo.controller;
 import com.example.demo.entity.Employee;
 import com.example.demo.entity.Pet;
 import com.example.demo.entity.User;
+import com.example.demo.mapper.UserMapper;
 import com.example.demo.mbextend.QEmployee;
 import com.example.demo.mbextend.QField;
 import com.example.demo.mbextend.QPet;
 import com.example.demo.mbextend.QUser;
 import com.example.demo.mbextend.builder.SqlBuilder;
+import com.example.demo.mbextend.enums.TimeField;
 import com.example.demo.mbextend.sqlparts.*;
-import com.example.demo.mapper.UserMapper;
 import com.example.demo.service.EmployeeService;
 import com.example.demo.service.PetService;
 import com.example.demo.service.UserService;
@@ -23,7 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.sql.DataSource;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author lvqi

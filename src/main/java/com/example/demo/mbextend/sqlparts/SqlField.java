@@ -1,5 +1,7 @@
 package com.example.demo.mbextend.sqlparts;
 
+import com.example.demo.mbextend.enums.SqlOperator;
+
 import java.util.Arrays;
 import java.util.List;
 

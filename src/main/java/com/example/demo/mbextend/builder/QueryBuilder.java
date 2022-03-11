@@ -1,6 +1,8 @@
 package com.example.demo.mbextend.builder;
 
 import com.example.demo.mbextend.QField;
+import com.example.demo.mbextend.enums.ConditionCombineType;
+import com.example.demo.mbextend.enums.JoinType;
 import com.example.demo.mbextend.sqlparts.*;
 import lombok.Data;
 
@@ -88,7 +90,7 @@ public class QueryBuilder {
     }
 
     public QueryBuilder join(SqlTaBle sqlTaBle, SqlCondition joinCondition){
-        sqlFromTables.add(new FromTable(sqlTaBle,joinCondition,JoinType.INNER_JOIN));
+        sqlFromTables.add(new FromTable(sqlTaBle,joinCondition, JoinType.INNER_JOIN));
         return this;
     }
 
@@ -114,7 +116,7 @@ public class QueryBuilder {
 
     public QueryBuilder and(SqlCondition ... sqlCondition){
         SqlWhere sqlWhere = SqlWhere.custom(sqlCondition);
-        this.sqlWhere.addSqlWhere(sqlWhere,ConditionCombineType.AND);
+        this.sqlWhere.addSqlWhere(sqlWhere, ConditionCombineType.AND);
         return this;
     }
 
