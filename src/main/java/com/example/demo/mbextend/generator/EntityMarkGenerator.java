@@ -72,13 +72,14 @@ public class EntityMarkGenerator {
                     fields.addAll(Arrays.asList(superclass.getDeclaredFields()));
                 }
                 fields.forEach(f->{
-                    TableField annotation = f.getAnnotation(TableField.class);
-                    if(annotation==null || annotation.exist()) {
-                        String column = f.getName();
-                        if(annotation!=null && !annotation.value().equals("")){
-                            column = annotation.value();
+                    TableField tableField = f.getAnnotation(TableField.class);
+                    if(tableField==null || tableField.exist()) {
+                        String column;
+                        if(tableField!=null && !tableField.value().equals("")){
+                            column = tableField.value().toLowerCase();
+                        }else{
+                            column = camelConvert(f.getName());
                         }
-                        column = camelConvert(column);
                         fieldsDeclare.append(String.format("\tpublic QField %s;\n", f.getName()));
                         fieldInits.append(String.format("\n\t\tthis.%s = new QField(tableAlias,\"%s\",null,columnPrefix);",
                                 f.getName(), column));

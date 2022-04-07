@@ -104,7 +104,11 @@ public class QueryBuilder {
     }
 
     public QueryBuilder where(SqlCondition ... sqlCondition){
-        this.sqlWhere = new ArrayList<>(Arrays.asList(sqlCondition));
+        if(this.sqlWhere==null) {
+            this.sqlWhere = new ArrayList<>(Arrays.asList(sqlCondition));
+        }else{
+            this.sqlWhere.addAll(new ArrayList<>(Arrays.asList(sqlCondition)));
+        }
         return this;
     }
 

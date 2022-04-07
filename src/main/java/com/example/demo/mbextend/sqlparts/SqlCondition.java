@@ -64,6 +64,11 @@ public class SqlCondition implements SqlField{
     }
 
     private void combineCondition(ConditionCombineType combineType, SqlCondition ... sqlConditions){
+
+        if(this.condition.startsWith("(")){
+            this.condition = this.condition.substring(1,this.condition.length()-1);
+        }
+
         this.condition = "( " + this.condition;
         StringBuilder conditions = new StringBuilder();
         switch (combineType){
