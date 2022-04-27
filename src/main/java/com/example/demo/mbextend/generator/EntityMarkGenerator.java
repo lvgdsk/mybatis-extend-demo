@@ -14,10 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * 创建实体辅助类
@@ -35,6 +32,7 @@ public class EntityMarkGenerator {
     private static String mbextend = "com/example/demo/mbextend";
     // 要生成标记类的实体类对象
     private static List<Class<?>> entityClasses = Arrays.asList(User.class, Pet.class, Employee.class);
+//    private static List<String> tableAliases = Arrays.asList("u","p","e");
 
     public static void main(String[] args){
         String extendPath = sourceDir+mbextend;

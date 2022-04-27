@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @author lvqi
  * @version 1.0.0
@@ -21,4 +23,6 @@ public class Employee {
     private String empName;
     @TableField(exist = false)
     private Integer lvl;
+    @TableField(exist = false)
+    private List<Employee> employeeList;
 }
