@@ -5,9 +5,9 @@ import com.example.demo.mbextend.enums.JoinType;
 import com.example.demo.mbextend.sqlparts.*;
 import lombok.Data;
 
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author lvqi
@@ -18,102 +18,103 @@ import java.util.stream.Collectors;
 @Data
 public class QueryBuilder {
 
-    private List<FromTable> sqlFromTables;
-    private List<SqlField> sqlSelectFields;
-    private List<SqlCondition> sqlWhere;
-    private List<OrderItem> sqlOrders;
-    private List<GroupItem> sqlGroups;
-    private List<SqlCondition> sqlHaving;
+    private List<QueryTable> queryTables;
+    private List<QField> queryColumns;
+    private List<ConditionExpr> whereConditions;
+    private List<OrderExpr> queryOrders;
+    private List<GroupExpr> queryGroups;
+    private List<ConditionExpr> HavingConditions;
     private boolean distinct;
     private Integer selectCount;
     private Integer selectOffset;
-    private List<SqlQuery> unions;
-    private String columnPrefix;
-    private String tableAlias;
+    private int index;
+    private boolean hadEndFrom;
 
     private QueryBuilder(SqlTaBle sqlTaBle) {
-        sqlFromTables = new ArrayList<>(4);
-        sqlFromTables.add(new FromTable(sqlTaBle));
+        this.index = 1;
+        this.queryTables = new ArrayList<>(8);
+        sqlTaBle.setTableAlias("t"+this.index);
+        this.queryTables.add(new QueryTable(sqlTaBle));
+    }
+
+    static QueryBuilder from(SqlTaBle sqlTaBle){
+        return new QueryBuilder(sqlTaBle);
+    }
+
+    public QueryBuilder join(SqlTaBle sqlTaBle, ConditionExpr joinCondition){
+        if(hadEndFrom){
+            throw new RuntimeException("join子句需紧随from子句后");
+        }
+        sqlTaBle.setTableAlias("t"+(++this.index));
+        this.queryTables.add(new QueryTable(sqlTaBle,joinCondition, JoinType.INNER_JOIN));
+        return this;
+    }
+
+    public QueryBuilder leftjoin(SqlTaBle sqlTaBle, ConditionExpr joinCondition){
+        if(hadEndFrom){
+            throw new RuntimeException("join子句需紧随from子句后");
+        }
+        sqlTaBle.setTableAlias("t"+(++this.index));
+        this.queryTables.add(new QueryTable(sqlTaBle,joinCondition,JoinType.LEFT_JOIN));
+        return this;
+    }
+
+    public QueryBuilder rightjoin(SqlTaBle sqlTaBle, ConditionExpr joinCondition){
+        if(hadEndFrom){
+            throw new RuntimeException("join子句需紧随from子句后");
+        }
+        sqlTaBle.setTableAlias("t"+(++this.index));
+        this.queryTables.add(new QueryTable(sqlTaBle,joinCondition,JoinType.RIGHT_JOIN));
+        return this;
     }
 
     public QueryBuilder distinct(){
-        distinct = true;
+        this.distinct = true;
+        this.hadEndFrom = true;
         return this;
     }
 
     public QueryBuilder select(SqlTaBle ... sqlTaBles){
-        if(this.sqlSelectFields==null){
-            this.sqlSelectFields = new ArrayList<>(20);
+        if(this.queryColumns==null){
+            this.queryColumns = new ArrayList<>(20);
         }
         for (SqlTaBle sqlTaBle : sqlTaBles) {
-            if(sqlTaBle instanceof SqlQuery){
-                SqlQuery sqlQuery = (SqlQuery)sqlTaBle;
-                for(SqlField sqlField : sqlQuery.getSqlFields()){
-                    if(!sqlSelectFields.contains(sqlField)){
-                        sqlSelectFields.add(sqlField);
-                    }
+            sqlTaBle.getQueryColumns().forEach(sf->{
+                if(!this.queryColumns.contains(sf)){
+                    this.queryColumns.add(sf);
                 }
-            }else {
-                Field[] fields = sqlTaBle.getClass().getDeclaredFields();
-                for (Field field : fields) {
-                    if (field.getType() != QField.class) {
-                        continue;
-                    }
-                    try {
-                        QField qField = (QField) field.get(sqlTaBle);
-                        this.sqlSelectFields.add(qField);
-                    } catch (IllegalAccessException illegalAccessException) {
-                        throw new RuntimeException(String.format("获取%s实例的%s字段值失败",
-                                sqlTaBle.getClass().getSimpleName(), field.getName()));
-                    }
-                }
+            });
+        }
+        this.hadEndFrom = true;
+        return this;
+    }
+
+    public QueryBuilder select(QField ... qFields){
+        if(this.queryColumns==null){
+            this.queryColumns = new ArrayList<>(20);
+        }
+        for (QField qField : qFields) {
+            if(!this.queryColumns.contains(qField)){
+                this.queryColumns.add(qField);
             }
         }
+        this.hadEndFrom = true;
         return this;
     }
 
-    public QueryBuilder select(SqlField ... sqlFields){
-        if(this.sqlSelectFields==null){
-            this.sqlSelectFields = new ArrayList<>(20);
-        }
-        for (SqlField sqlField : sqlFields) {
-            if(!sqlSelectFields.contains(sqlField)){
-                sqlSelectFields.add(sqlField);
-            }
-        }
-        return this;
-    }
-
-    public static QueryBuilder from(SqlTaBle sqlTaBle){
-        return new QueryBuilder(sqlTaBle);
-    }
-
-    public QueryBuilder join(SqlTaBle sqlTaBle, SqlCondition joinCondition){
-        sqlFromTables.add(new FromTable(sqlTaBle,joinCondition, JoinType.INNER_JOIN));
-        return this;
-    }
-
-    public QueryBuilder leftjoin(SqlTaBle sqlTaBle, SqlCondition joinCondition){
-        sqlFromTables.add(new FromTable(sqlTaBle,joinCondition,JoinType.LEFT_JOIN));
-        return this;
-    }
-
-    public QueryBuilder rightjoin(SqlTaBle sqlTaBle, SqlCondition joinCondition){
-        sqlFromTables.add(new FromTable(sqlTaBle,joinCondition,JoinType.RIGHT_JOIN));
-        return this;
-    }
-
-    public QueryBuilder where(SqlCondition ... sqlCondition){
-        if(this.sqlWhere==null) {
-            this.sqlWhere = new ArrayList<>(Arrays.asList(sqlCondition));
+    public QueryBuilder where(ConditionExpr ... sqlCondition){
+        if(this.whereConditions==null) {
+            this.whereConditions = new ArrayList<>(Arrays.asList(sqlCondition));
         }else{
-            this.sqlWhere.addAll(new ArrayList<>(Arrays.asList(sqlCondition)));
+            this.whereConditions.addAll(new ArrayList<>(Arrays.asList(sqlCondition)));
         }
+        this.hadEndFrom = true;
         return this;
     }
 
-    public QueryBuilder orderBy(OrderItem ... orderItems){
-        this.sqlOrders = new ArrayList<>(Arrays.asList(orderItems));
+    public QueryBuilder orderBy(OrderExpr ... orderExprList){
+        this.queryOrders = new ArrayList<>(Arrays.asList(orderExprList));
+        this.hadEndFrom = true;
         return this;
     }
 
@@ -126,74 +127,33 @@ public class QueryBuilder {
         }
         this.selectOffset = (page-1)*pageSize;
         this.selectCount = pageSize;
+        this.hadEndFrom = true;
         return this;
     }
 
     public QueryBuilder limit(int offset, int count){
         this.selectCount = count;
         this.selectOffset = offset;
+        this.hadEndFrom = true;
         return this;
     }
 
-    public QueryBuilder groupBy(GroupItem ... groupItems){
-        this.sqlGroups = new ArrayList<>(Arrays.asList(groupItems));
+    public QueryBuilder groupBy(GroupExpr ... groupExprList){
+        this.queryGroups = new ArrayList<>(Arrays.asList(groupExprList));
+        this.hadEndFrom = true;
         return this;
     }
 
-    public QueryBuilder having(SqlCondition ... sqlCondition){
-        this.sqlHaving = new ArrayList<>(Arrays.asList(sqlCondition));
-        return this;
-    }
-
-    public QueryBuilder union(SqlQuery ... sqlQueries){
-        if (unions == null) {
-            unions = new ArrayList<>(5);
-        }
-        unions.addAll(Arrays.stream(sqlQueries).peek(sq -> sq.setUnionALl(false)).collect(Collectors.toList()));
-        return this;
-    }
-
-    public QueryBuilder unionALL(SqlQuery ... sqlQueries){
-        if (unions == null) {
-            unions = new ArrayList<>(5);
-        }
-        unions.addAll(Arrays.asList(sqlQueries));
+    public QueryBuilder having(ConditionExpr ... sqlCondition){
+        this.HavingConditions = new ArrayList<>(Arrays.asList(sqlCondition));
+        this.hadEndFrom = true;
         return this;
     }
 
     public SqlQuery build(){
-        return build(null);
-    }
-
-    public SqlQuery build(String cteName){
-        if(sqlSelectFields==null){
-            sqlFromTables.forEach(sft-> select(sft.getSqlTaBle()));
+        if(queryColumns==null){
+            queryTables.forEach(sft-> select(sft.getSqlTaBle()));
         }
-        SqlQuery sqlQuery = SqlStatementBuilder.buildQuery(this);
-        if(tableAlias!=null){
-            sqlQuery.setTableAlias(tableAlias);
-        }else {
-            sqlQuery.setTableAlias("t" + UUID.randomUUID().toString().substring(0, 8));
-        }
-        if(cteName!=null){
-            sqlQuery.setCte(true);
-            sqlQuery.setCteName(cteName);
-        }
-        Set<SqlField> sqlFields = sqlSelectFields.stream().map(sf ->
-             new QField(sqlQuery.getTableAlias(), sf.getColumnAlias()!=null?sf.getColumnAlias():sf.getColumn(), null,columnPrefix)
-        ).collect(Collectors.toSet());
-        sqlQuery.setSqlFields(sqlFields);
-
-        return sqlQuery;
-    }
-
-    public QueryBuilder columnPrefix(String columnPrefix){
-        this.columnPrefix = columnPrefix;
-        return this;
-    }
-
-    public QueryBuilder tableAlias(String tableAlias){
-        this.tableAlias = tableAlias;
-        return this;
+        return SqlStatementBuilder.buildQuery(this);
     }
 }

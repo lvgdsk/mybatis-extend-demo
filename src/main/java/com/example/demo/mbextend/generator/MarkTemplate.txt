@@ -1,18 +1,22 @@
 package $path$;
 
+import $path$.sqlparts.SqlField;
 import $path$.sqlparts.SqlTaBle;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class Q$entity$ implements SqlTaBle {
-	private static String tableName = "$table$";
+	private static final String tableName = "$table$";
 	private String tableAlias;
 
 $fieldsDeclare$
-    public Q$entity$(String tableAlias) {
-        this(tableAlias,null);
+    public Q$entity$() {
+        this(null);
     }
 
-	public Q$entity$(String tableAlias,String columnPrefix) {
-	    this.tableAlias = tableAlias;$fieldInits$
+	public Q$entity$(String columnPrefix) {
+        $fieldInits$
     }
 
 	@Override
@@ -20,8 +24,18 @@ $fieldsDeclare$
 		return Q$entity$.tableName;
 	}
 
+    @Override
+    public void setTableAlias(String tableAlias) {
+        this.tableAlias = tableAlias;
+    }
+
 	@Override
 	public String getTableAlias() {
-		return tableAlias;
+		return this.tableAlias;
 	}
+
+    @Override
+    public List<SqlField> getAllSqlField() {
+        return Arrays.asList($sqlFields$);
+    }
 }

@@ -14,7 +14,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * 创建实体辅助类
@@ -25,14 +28,11 @@ import java.util.*;
 @Slf4j
 public class EntityMarkGenerator {
     // 原码路径
-    private static String sourceDir = "src/main/java/";
-    // 实体的包路径
-    private static String packageDir = "com/example/demo/entity";
+    private static final String sourceDir = "src/main/java/";
     // 扩展包路径
-    private static String mbextend = "com/example/demo/mbextend";
+    private static final String mbextend = "com/example/demo/mbextend";
     // 要生成标记类的实体类对象
-    private static List<Class<?>> entityClasses = Arrays.asList(User.class, Pet.class, Employee.class);
-//    private static List<String> tableAliases = Arrays.asList("u","p","e");
+    private static final List<Class<?>> entityClasses = Arrays.asList(User.class, Pet.class, Employee.class);
 
     public static void main(String[] args){
         String extendPath = sourceDir+mbextend;
@@ -44,9 +44,8 @@ public class EntityMarkGenerator {
             log.error("目录({})获取失败",directory.getAbsolutePath());
             return;
         }
-
         // 生成实体类辅助类java文件
-        entityClasses.forEach(tClass -> {
+        for (Class<?> tClass : entityClasses) {
             String tableName;
             TableName tableNameAnno = tClass.getAnnotation(TableName.class);
             if(tableNameAnno==null || tableNameAnno.value().equals("")){
@@ -69,6 +68,7 @@ public class EntityMarkGenerator {
                 if(superclass!=null) {
                     fields.addAll(Arrays.asList(superclass.getDeclaredFields()));
                 }
+                List<String> qFields = new ArrayList<>();
                 fields.forEach(f->{
                     TableField tableField = f.getAnnotation(TableField.class);
                     if(tableField==null || tableField.exist()) {
@@ -79,12 +79,14 @@ public class EntityMarkGenerator {
                             column = camelConvert(f.getName());
                         }
                         fieldsDeclare.append(String.format("\tpublic QField %s;\n", f.getName()));
-                        fieldInits.append(String.format("\n\t\tthis.%s = new QField(tableAlias,\"%s\",null,columnPrefix);",
+                        fieldInits.append(String.format("\n\t\tthis.%s = new QField(null,\"%s\",null,columnPrefix);",
                                 f.getName(), column));
+                        qFields.add(f.getName());
                     }
                 });
                 markTemplate = markTemplate.replaceAll("\\$fieldsDeclare\\$", fieldsDeclare.toString());
                 markTemplate = markTemplate.replaceAll("\\$fieldInits\\$", fieldInits.toString());
+                markTemplate = markTemplate.replaceAll("\\$sqlFields\\$", String.join(",",qFields));
             } catch (IOException e) {
                 log.error("文件：{}，读取失败",filePath.toAbsolutePath(),e);
                 return;
@@ -108,7 +110,7 @@ public class EntityMarkGenerator {
             } catch (IOException e) {
                 log.error("文件({})写入失败。",javaFile.getAbsolutePath());
             }
-        });
+        }
     }
 
     //首字母变小写，其余大写字母变成下划线加小写，如：UserName -> user_name

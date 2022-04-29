@@ -15,14 +15,18 @@ import java.util.*;
  */
 @Data
 public class UpdateBuilder {
-    private List<FromTable> sqlFromTables;
+    private List<QueryTable> updateTables;
     private Set<String> sqlSets;
-    private List<SqlCondition> sqlWhere;
+    private List<ConditionExpr> whereConditions;
     List<Object> params;
+    private int index;
+    private boolean hadEndFrom;
 
     private UpdateBuilder(SqlTaBle sqlTaBle) {
-        sqlFromTables = new ArrayList<>(4);
-        sqlFromTables.add(new FromTable(sqlTaBle));
+        this.index = 1;
+        updateTables = new ArrayList<>(8);
+        sqlTaBle.setTableAlias("t"+this.index);
+        updateTables.add(new QueryTable(sqlTaBle));
         params = new ArrayList<>(16);
     }
 
@@ -30,31 +34,49 @@ public class UpdateBuilder {
         return new UpdateBuilder(sqlTaBle);
     }
 
-    public UpdateBuilder join(SqlTaBle sqlTaBle, SqlCondition joinCondition){
-        sqlFromTables.add(new FromTable(sqlTaBle,joinCondition, JoinType.INNER_JOIN));
+    public UpdateBuilder join(SqlTaBle sqlTaBle, ConditionExpr joinCondition){
+        if(hadEndFrom){
+            throw new RuntimeException("join子句需紧随from子句后");
+        }
+        sqlTaBle.setTableAlias("t"+(++this.index));
+        this.updateTables.add(new QueryTable(sqlTaBle,joinCondition, JoinType.INNER_JOIN));
         return this;
     }
 
-    public UpdateBuilder joinLeft(SqlTaBle sqlTaBle, SqlCondition joinCondition){
-        sqlFromTables.add(new FromTable(sqlTaBle,joinCondition, JoinType.LEFT_JOIN));
+    public UpdateBuilder leftjoin(SqlTaBle sqlTaBle, ConditionExpr joinCondition){
+        if(hadEndFrom){
+            throw new RuntimeException("join子句需紧随from子句后");
+        }
+        sqlTaBle.setTableAlias("t"+(++this.index));
+        this.updateTables.add(new QueryTable(sqlTaBle,joinCondition,JoinType.LEFT_JOIN));
         return this;
     }
 
-    public UpdateBuilder joinRight(SqlTaBle sqlTaBle, SqlCondition joinCondition){
-        sqlFromTables.add(new FromTable(sqlTaBle,joinCondition, JoinType.RIGHT_JOIN));
+    public UpdateBuilder rightjoin(SqlTaBle sqlTaBle, ConditionExpr joinCondition){
+        if(hadEndFrom){
+            throw new RuntimeException("join子句需紧随from子句后");
+        }
+        sqlTaBle.setTableAlias("t"+(++this.index));
+        this.updateTables.add(new QueryTable(sqlTaBle,joinCondition,JoinType.RIGHT_JOIN));
         return this;
     }
 
     public UpdateBuilder set(QField qField, Object value){
-        if(this.sqlSets==null){
-            this.sqlSets = new HashSet<>(10);
+        if(sqlSets==null){
+            sqlSets = new HashSet<>(10);
         }
         sqlSets.add(SqlExprBuilder.buildSetExpr(qField,value,this.params));
+        hadEndFrom = true;
         return this;
     }
 
-    public UpdateBuilder where(SqlCondition ... sqlCondition){
-        this.sqlWhere = new ArrayList<>(Arrays.asList(sqlCondition));
+    public UpdateBuilder where(ConditionExpr ... sqlCondition){
+        if(whereConditions==null) {
+            whereConditions = new ArrayList<>(Arrays.asList(sqlCondition));
+        }else{
+            whereConditions.addAll(new ArrayList<>(Arrays.asList(sqlCondition)));
+        }
+        hadEndFrom = true;
         return this;
     }
 

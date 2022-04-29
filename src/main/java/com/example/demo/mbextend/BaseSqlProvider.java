@@ -26,7 +26,7 @@ public class BaseSqlProvider {
 
     /** 构建select sql语句 */
     public static String select(SqlQuery sqlQuery){
-        return fillParams(sqlQuery.getFinalSqlStatement(),sqlQuery.getParams(),"sqlQuery");
+        return fillParams(sqlQuery.getSqlStatement(),sqlQuery.getParams(),"sqlQuery");
     }
 
     /** 构建update sql语句 */

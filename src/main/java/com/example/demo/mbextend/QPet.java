@@ -1,9 +1,13 @@
 package com.example.demo.mbextend;
 
+import com.example.demo.mbextend.sqlparts.SqlField;
 import com.example.demo.mbextend.sqlparts.SqlTaBle;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class QPet implements SqlTaBle {
-	private static String tableName = "pet";
+	private static final String tableName = "pet";
 	private String tableAlias;
 
 	public QField id;
@@ -11,16 +15,15 @@ public class QPet implements SqlTaBle {
 	public QField uid;
 	public QField species;
 
-    public QPet(String tableAlias) {
-        this(tableAlias,null);
+    public QPet() {
+        this(null);
     }
 
-	public QPet(String tableAlias,String columnPrefix) {
-	    this.tableAlias = tableAlias;
-		this.id = new QField(tableAlias,"id",null,columnPrefix);
-		this.name = new QField(tableAlias,"name",null,columnPrefix);
-		this.uid = new QField(tableAlias,"uid",null,columnPrefix);
-		this.species = new QField(tableAlias,"species",null,columnPrefix);
+	public QPet(String columnPrefix) {
+		this.id = new QField(null,"id",null,columnPrefix);
+		this.name = new QField(null,"name",null,columnPrefix);
+		this.uid = new QField(null,"uid",null,columnPrefix);
+		this.species = new QField(null,"species",null,columnPrefix);
     }
 
 	@Override
@@ -29,7 +32,17 @@ public class QPet implements SqlTaBle {
 	}
 
 	@Override
+	public void setTableAlias(String tableAlias) {
+		this.tableAlias = tableAlias;
+	}
+
+	@Override
 	public String getTableAlias() {
 		return tableAlias;
 	}
+
+    @Override
+    public List<SqlField> getAllSqlField() {
+        return Arrays.asList(id,name,uid,species);
+    }
 }

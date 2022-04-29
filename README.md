@@ -10,3 +10,9 @@ select 语句：
 6. order by 子句
 7. having 子句
 8. limit 子句
+
+
+
+表达式：表列、函数表达式、算式表达式、sql语句
+
+SqlExpr：ConditionExpr、ArithFuncExpr、QField、SqlQuery

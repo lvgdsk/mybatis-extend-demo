@@ -9,18 +9,18 @@ import lombok.Data;
  * @since 2022/2/17 10:58
  */
 @Data
-public class FromTable{
+public class QueryTable{
     private SqlTaBle sqlTaBle;
-    private SqlCondition sqlCondition;
+    private ConditionExpr joinCondition;
     private JoinType joinType;
 
-    public FromTable(SqlTaBle sqlTaBle) {
+    public QueryTable(SqlTaBle sqlTaBle) {
         this.sqlTaBle = sqlTaBle;
     }
 
-    public FromTable(SqlTaBle sqlTaBle, SqlCondition sqlCondition, JoinType joinType) {
+    public QueryTable(SqlTaBle sqlTaBle, ConditionExpr joinCondition, JoinType joinType) {
         this.sqlTaBle = sqlTaBle;
-        this.sqlCondition = sqlCondition;
+        this.joinCondition = joinCondition;
         this.joinType = joinType;
     }
 }

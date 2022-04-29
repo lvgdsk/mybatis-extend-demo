@@ -1,0 +1,24 @@
+package com.example.demo.mbextend.sqlparts;
+
+import java.util.List;
+
+/**
+ * @author lvqi
+ * @version 1.0.0
+ * @since 2022/4/29 17:02
+ */
+public class GroupExpr {
+    private String expression;
+    private List<Object> params;
+
+    public GroupExpr(String expression, List<Object> params) {
+        this.expression = expression;
+        this.params = params;
+    }
+    public String getExpression() {
+        return expression;
+    }
+    public List<Object> getParams() {
+        return params;
+    }
+}

@@ -1,5 +1,6 @@
 package com.example.demo.mbextend;
 
+import com.example.demo.mbextend.sqlparts.SqlExpr;
 import com.example.demo.mbextend.sqlparts.SqlField;
 import lombok.Data;
 
@@ -13,10 +14,10 @@ import java.util.List;
  * @since 2022/2/17 11:08
  */
 @Data
-public class QField implements SqlField {
+public class QField implements SqlExpr {
     // 表字段对应的表
     private String tableAlias;
-    // 表字段
+    // 表字段名
     private String column;
     // 表字段别名
     private String columnAlias;
@@ -40,8 +41,7 @@ public class QField implements SqlField {
         this.params = params;
     }
 
-    @Override
-    public String getQualifyField() {
+    public String getQualifyColumn() {
         if(this.tableAlias!=null) {
             return this.tableAlias + "." + this.column;
         }else{
@@ -67,5 +67,14 @@ public class QField implements SqlField {
 
     public static QField column(String tableAlias,String column,String columnAlias){
         return new QField(tableAlias,column,columnAlias,null);
+    }
+
+    public String getColumn() {
+        return column;
+    }
+
+    @Override
+    public String getExpression() {
+        return getQualifyColumn();
     }
 }

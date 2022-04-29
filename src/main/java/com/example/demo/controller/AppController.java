@@ -1,16 +1,8 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.Employee;
 import com.example.demo.entity.Pet;
 import com.example.demo.entity.User;
 import com.example.demo.mapper.UserMapper;
-import com.example.demo.mbextend.QEmployee;
-import com.example.demo.mbextend.QField;
-import com.example.demo.mbextend.QPet;
-import com.example.demo.mbextend.QUser;
-import com.example.demo.mbextend.builder.SqlBuilder;
-import com.example.demo.mbextend.enums.TimeField;
-import com.example.demo.mbextend.sqlparts.*;
 import com.example.demo.service.EmployeeService;
 import com.example.demo.service.PetService;
 import com.example.demo.service.UserService;
@@ -22,10 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.sql.DataSource;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -75,10 +63,10 @@ public class AppController {
     public List<User> listAllUser(){
         return userService.list();
     }
-
+/*
     @GetMapping("/test")
     private List<Pet> test(){
-        QPet pet = new QPet("p","pet");
+        QPet pet = new QPet();
 
         SqlExpr rank = SqlExpr.overRank(pet.uid, Collections.singletonList(pet.species), Collections.singletonList(pet.uid.orderAsc()));
         SqlQuery sqlQuery = SqlBuilder.query(pet)
@@ -96,8 +84,8 @@ public class AppController {
 
     @GetMapping("/select")
     private List<User> select(){
-        QUser user = new QUser("u","user");
-        QPet pet = new QPet("p","pet");
+        QUser user = new QUser();
+        QPet pet = new QPet("p");
         SqlQuery sqlQuery = SqlBuilder.query(user)
                 .leftjoin(pet, pet.uid.eq(user.id))
                 .select(user)
@@ -111,8 +99,8 @@ public class AppController {
     @GetMapping("/select1")
     private List<User> select1(){
 
-        QUser user = new QUser("u","user");
-        QPet pet = new QPet("p","pet");
+        QUser user = new QUser();
+        QPet pet = new QPet("p");
         SqlQuery sqlQuery = SqlBuilder
                 .query(user).leftjoin(pet,pet.uid.eq(user.id))
                 .select(user)
@@ -124,8 +112,8 @@ public class AppController {
 
     @GetMapping("/select2")
     private List<User> select2(){
-        QUser user = new QUser("u","user");
-        QPet pet = new QPet("p","pet");
+        QUser user = new QUser();
+        QPet pet = new QPet("p");
         SqlQuery sqlQuery1 = SqlBuilder.query(pet)
                 .select(pet.uid)
                 .where(pet.id.eq(2)).build();
@@ -150,8 +138,8 @@ public class AppController {
 
     @GetMapping("/update2")
     private Integer update2(){
-        QUser user = new QUser("u",null);
-        QPet pet = new QPet("p",null);
+        QUser user = new QUser();
+        QPet pet = new QPet("p");
         SqlUpdate sqlUpdate = SqlBuilder.update(user)
                 .join(pet, pet.uid.eq(user.id))
                 .set(user.birthday, new java.util.Date())
@@ -176,39 +164,38 @@ public class AppController {
 
     @GetMapping("/testUnion")
     public List<Pet> testUnion(){
-        QPet pet = new QPet("p","pet");
+        QPet pet = new QPet();
         SqlQuery sqlQuery1 = SqlBuilder.query(pet)
                 .select(pet)
                 .where(pet.id.eq(3)).build();
 
         SqlQuery sqlQuery2 = SqlBuilder.query(pet)
                 .select(pet)
-                .where(pet.id.eq(2)).union(sqlQuery1).build();
-        return petService.select(sqlQuery2);
+                .where(pet.id.eq(2))
+                .build();
+
+        return petService.select(sqlQuery1.union(sqlQuery2));
     }
 
     @GetMapping("/testCte")
     public List<Employee> testCte(){
 
-        QEmployee qe = new QEmployee("emp",null);
+        QEmployee qe = new QEmployee();
 
-        SqlQuery sqlQuery = SqlBuilder
-                .query(qe)
+        SqlQuery sqlQuery = SqlBuilder.query(qe)
                 .select(qe)
                 .select(QField.column("1","lvl"))
                 .where(qe.leaderNumber.isNull())
-                .columnPrefix("employee")
-                .tableAlias("cte")
                 .build("emp_path");
 
-        SqlQuery sqlQuery1 = SqlBuilder
-                .query(qe)
+        SqlQuery sqlQuery1 = SqlBuilder.query(qe)
                 .join(sqlQuery, qe.leaderNumber.eq(sqlQuery.column(qe.empNumber)))
                 .select(qe)
                 .select(QField.column("lvl+1","lvl"))
                 .build();
 
-        sqlQuery.unionRecursive(sqlQuery1);
+        SqlQuery sqlQuery3 = sqlQuery.union(sqlQuery1).setIsCte(true);
+
         SqlQuery sqlQuery2 = SqlBuilder.query(sqlQuery).build();
 
         return employeeService.select(sqlQuery2);
@@ -223,7 +210,7 @@ public class AppController {
         }
         return new Date();
     }
-
+*/
 //    @GetMapping("test1")
 //    public List<User> test1() throws SQLException {
 ////        QueryWrapper<User> queryWrapper = new QueryWrapper<>();

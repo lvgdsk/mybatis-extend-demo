@@ -1,53 +1,52 @@
 package com.example.demo.mbextend.sqlparts;
 
+import com.example.demo.mbextend.QField;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author lvqi
  * @version 1.0.0
  * @since 2022/2/17 11:06
  */
-@Data
-public class SqlQuery implements SqlTaBle, SqlField, SqlStatement {
+public class SqlQuery implements SqlTaBle, SqlExpr, SqlStatement {
     // sql语句
     private String sqlStatement;
-    // cte子句, 目前只知道cte查询能放在from子句,别的用法有待探索
-    private String cteStatement;
     private String tableAlias;
-    private boolean isCte = false;
-    private String cteName;
-    private boolean isUnionALl = false;
-    // 是否是递归cte
-    private boolean isRecursive = false;
-    private Set<SqlField> sqlFields;
+    // 是否是cte查询子句
+    private boolean isCte;
+    // 是否是递归cte查询子句
+    private boolean isRecursive;
+    private List<QField> queryColumns;
     private List<Object> params;
     private String columnAlias;
 
-    public SqlQuery(String sqlStatement,List<Object> params) {
+    public SqlQuery(String sqlStatement,List<Object> params,List<QField> queryColumns) {
         this.sqlStatement = sqlStatement;
-        this.cteStatement = "";
         this.params = params;
+        this.queryColumns = queryColumns;
     }
 
     @Override
     public String getTableName() {
         if(isCte){
-            return cteName;
+            return tableAlias;
         }
         return "(" + sqlStatement + ")";
     }
 
-    @Override
-    public String getColumn() {
-        return "(" + sqlStatement + ")";
-    }
-
-    @Override
-    public String getQualifyField() {
-        return "(" + sqlStatement + ")";
+    public void setTableAlias(String tableAlias) {
+        queryColumns = queryColumns.stream().map(column->{
+            String columnName = column.getColumnAlias()==null?column.getColumn():column.getColumnAlias();
+            return new QField(tableAlias,columnName,null,null);
+        }).collect(Collectors.toList());
+        this.tableAlias = tableAlias;
     }
 
     @Override
@@ -55,9 +54,14 @@ public class SqlQuery implements SqlTaBle, SqlField, SqlStatement {
         return this.tableAlias;
     }
 
-    public SqlField column(SqlField sqlField){
-        String columnName = sqlField.getColumnAlias()==null?sqlField.getColumn():sqlField.getColumnAlias();
-        for (SqlField field : sqlFields) {
+    @Override
+    public List<QField> getQueryColumns() {
+        return null;
+    }
+
+    public QField column(QField qField){
+        String columnName = qField.getColumnAlias()==null?qField.getColumn():qField.getColumnAlias();
+        for (QField field : queryColumns) {
             if(field.getColumn().equals(columnName)){
                 return field;
             }
@@ -65,16 +69,53 @@ public class SqlQuery implements SqlTaBle, SqlField, SqlStatement {
         throw new RuntimeException(columnName+"字段不存在");
     }
 
-    public void unionRecursive(SqlQuery sqlQuery){
+    public SqlQuery union(SqlQuery other){
+        return union(other,false);
+    }
+
+    public SqlQuery unionAll(SqlQuery other){
+        return union(other,true);
+    }
+
+    private SqlQuery union(SqlQuery other,boolean isAll){
+        String operator = isAll?"union all":"union";
+        String sqlStatement = this.getSqlStatement() + operator + other.getSqlStatement();
+        List<Object> params = new ArrayList<>(this.params.size()+other.getParams().size());
+        params.addAll(this.params);
+        params.addAll(other.getParams());
+        return new SqlQuery(sqlStatement , params, this.queryColumns);
+    }
+
+    public SqlQuery setIsCte(boolean isRecursive){
         this.isCte = true;
-        this.isRecursive = true;
-        params.addAll(sqlQuery.getParams());
-        this.sqlStatement += " union " + sqlQuery.getSqlStatement();
+        this.isRecursive = isRecursive;
+        return this;
     }
 
-    public String getFinalSqlStatement(){
-        return cteStatement + sqlStatement;
+    @Override
+    public String getSqlStatement() {
+        return sqlStatement;
     }
 
+    public boolean isCte() {
+        return isCte;
+    }
 
+    public boolean isRecursive() {
+        return isRecursive;
+    }
+
+    @Override
+    public String getExpression() {
+        return sqlStatement;
+    }
+
+    @Override
+    public List<Object> getParams() {
+        return params;
+    }
+
+    public QField toQueryColumn(String columnAlias){
+        return new QField(this.sqlStatement,columnAlias,this.params);
+    }
 }

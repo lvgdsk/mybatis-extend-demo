@@ -1,5 +1,6 @@
 package com.example.demo.mbextend.builder;
 
+import com.example.demo.mbextend.enums.JoinType;
 import com.example.demo.mbextend.sqlparts.*;
 
 import java.util.ArrayList;
@@ -15,38 +16,33 @@ public class SqlStatementBuilder {
     public static SqlQuery buildQuery(QueryBuilder queryBuilder){
         StringBuilder builder = new StringBuilder();
         List<Object> params = new ArrayList<>(25);
-        // 构建cte子句
-        String cteStatement = buildCte(queryBuilder.getSqlFromTables(),params);
+        // 构建cte
+//        buildCte(builder,queryBuilder.getSqlFromTables(),params);
         // 构建select子句
-        buildSelect(builder, queryBuilder.getSqlSelectFields(), queryBuilder.isDistinct(),params);
+        buildSelect(builder, queryBuilder ,params);
         // 构建from子句
-        buildFrom(builder, queryBuilder.getSqlFromTables(),params);
+        buildFrom(builder, queryBuilder,params);
         // 构建where子句
-        buildWhere(builder, queryBuilder.getSqlWhere(),params);
+        buildWhere(builder, queryBuilder.getWhereConditions(),params);
         // 构建group by子句
-        buildGroupBy(builder, queryBuilder.getSqlGroups(),params);
+        buildGroupBy(builder, queryBuilder.getQueryGroups(),params);
         // 构建having子句
-        buildWhere(builder, queryBuilder.getSqlHaving(),params);
+        buildWhere(builder, queryBuilder.getHavingConditions(),params);
         // 构建order by
-        buildOrderBy(builder, queryBuilder.getSqlOrders(),params);
+        buildOrderBy(builder, queryBuilder.getQueryOrders(),params);
         // 构建limit子句
         buildLimit(builder, queryBuilder);
-        // 构建union查询
-        buildUnion(builder, queryBuilder.getUnions(),params);
 
-        SqlQuery sqlQuery = new SqlQuery(builder.toString(),params);
-        sqlQuery.setCteStatement(cteStatement);
-
-        return sqlQuery;
+        return new SqlQuery(builder.toString(),params,queryBuilder.getQueryColumns());
     }
 
-    private static String buildCte(List<FromTable> sqlFromTables, List<Object> params){
+/*    private static void buildCte(StringBuilder builder, List<FromTable> sqlFromTables, List<Object> params){
         List<SqlQuery> ctes = sqlFromTables.stream().filter(sft -> {
             SqlTaBle sqlTaBle = sft.getSqlTaBle();
             return sqlTaBle instanceof SqlQuery && ((SqlQuery) sqlTaBle).isCte();
         }).map(sft-> (SqlQuery)sft.getSqlTaBle()).collect(Collectors.toList());
         if(ctes.isEmpty()){
-            return "";
+            return;
         }
         String cteStatement = ctes.stream().map(cte -> {
             String cteStr;
@@ -56,21 +52,21 @@ public class SqlStatementBuilder {
                 cteStr = "";
             }
             params.addAll(cte.getParams());
-            cteStr += cte.getCteName() + " as " + cte.getQualifyField();
+            cteStr += cte.getTableAlias() + " as " + cte.getQualifyField();
             return cteStr;
         }).collect(Collectors.joining(","));
-        return "with "+cteStatement;
-    }
+        builder.append("with ").append(cteStatement);
+    }*/
 
     /** 构建select子句 */
-    private static void buildSelect(StringBuilder builder, List<SqlField> sqlSelectFields, boolean distinct, List<Object> params){
-        builder.append("select ");
-        if(distinct){
-            builder.append("distinct ");
+    private static void buildSelect(StringBuilder builder, QueryBuilder queryBuilder, List<Object> params){
+        builder.append("select");
+        if(queryBuilder.isDistinct()){
+            builder.append(" distinct");
         }
-        sqlSelectFields.forEach( sf ->{
+        queryBuilder.getQueryColumns().forEach( sf ->{
             params.addAll(sf.getParams());
-            builder.append(sf.getQualifyField());
+            builder.append(" ").append(sf.getQualifyColumn());
             if(sf.getColumnAlias()!=null){
                 builder.append(" as ").append(sf.getColumnAlias());
             }
@@ -80,89 +76,63 @@ public class SqlStatementBuilder {
     }
 
     /** 构建from子句 */
-    private static void buildFrom(StringBuilder builder, List<FromTable> sqlFromTables,List<Object> params){
-        builder.append(" from ");
-        buildFromOrUpdate(builder,sqlFromTables,params);
+    private static void buildFrom(StringBuilder builder, QueryBuilder queryBuilder,List<Object> params){
+        builder.append(" from");
+        buildFromOrUpdate(builder,queryBuilder.getQueryTables(),params);
     }
 
-    private static void buildFromOrUpdate(StringBuilder builder,List<FromTable> sqlFromTables,List<Object> params){
-        sqlFromTables.forEach(table -> {
-            if(table.getJoinType()!=null){
-                builder.append(" ")
-                        .append(table.getJoinType().value())
-                        .append(" ");
+    private static void buildFromOrUpdate(StringBuilder builder,List<QueryTable> queryTables,List<Object> params){
+        queryTables.forEach(qt -> {
+            SqlTaBle sqlTaBle = qt.getSqlTaBle();
+            JoinType joinType = qt.getJoinType();
+            ConditionExpr joinCondition = qt.getJoinCondition();
+            if(joinType!=null){
+                builder.append(" ").append(joinType.value());
             }
-            SqlTaBle sqlTaBle = table.getSqlTaBle();
             if(sqlTaBle instanceof SqlQuery){
                 params.addAll(((SqlQuery)sqlTaBle).getParams());
             }
-            builder.append(table.getSqlTaBle().getTableName());
-            if(table.getSqlTaBle().getTableAlias()!=null){
-                builder.append(" as ").append(table.getSqlTaBle().getTableAlias());
+            builder.append(" ").append(sqlTaBle.getTableName());
+            if(sqlTaBle.getTableAlias()!=null){
+                builder.append(" as ").append(sqlTaBle.getTableAlias());
             }
-            builder.append(" ");
-            if(table.getJoinType()!=null){
-                params.addAll(table.getSqlCondition().getParams());
-                builder.append(" on ");
-                if(table.getSqlCondition().isNot()){
-                    builder.append(" not ");
-                }
-                builder.append(table.getSqlCondition().getCondition());
+            if(joinCondition!=null){
+                params.addAll(joinCondition.getParams());
+                builder.append(" on ").append(joinCondition.getExpression());
             }
         });
     }
 
     /** 构建where子句 */
-    private static void buildWhere(StringBuilder builder, List<SqlCondition> sqlConditions, List<Object> params){
-//        if(sqlWhere!=null) {
-//            builder.append(" where ");
-//            buildWhereItem(builder, sqlWhere, alias,params);
-//            List<SqlWhere> sqlWheres = sqlWhere.getSqlWheres();
-//            if(sqlWheres!=null) {
-//                sqlWheres.forEach(where -> {
-//                    builder.append(where.getCombineType().getSymbol())
-//                            .append(" ( ");
-//                    buildWhereItem(builder, where, alias ,params);
-//                    builder.append(" ) ");
-//                });
-//            }
-//        }
-        if(sqlConditions!=null && !sqlConditions.isEmpty()){
+    private static void buildWhere(StringBuilder builder, List<ConditionExpr> conditionExprList, List<Object> params){
+        if(conditionExprList!=null && !conditionExprList.isEmpty()){
             builder.append(" where ").append(
-                sqlConditions.stream().map(sc->{
-                    params.addAll(sc.getParams());
-                    String expr = sc.getCondition();
-                    if(sc.isNot()){
-                        expr = "not " + expr;
-                    }
-                    return expr;
+                    conditionExprList.stream().map(expr->{
+                    params.addAll(expr.getParams());
+                    return expr.getExpression();
                 }).collect(Collectors.joining(" and ")));
         }
     }
 
     /** 构建group by子句 */
-    private static void buildGroupBy(StringBuilder builder,List<GroupItem> groupItems,List<Object> params){
-        if(groupItems!=null){
-            builder.append(" group by ");
-            groupItems.forEach(gi -> {
-                params.addAll(gi.getSqlField().getParams());
-                builder.append(gi.getSqlField().getQualifyField())
-                        .append(gi.isAsc()?",":" desc,");
-            });
-            builder.deleteCharAt(builder.length()-1);
+    private static void buildGroupBy(StringBuilder builder,List<GroupExpr> queryGroups,List<Object> params){
+        if(queryGroups!=null && !queryGroups.isEmpty()){
+            builder.append(" group by ").append(
+                    queryGroups.stream().map(expr->{
+                        params.addAll(expr.getParams());
+                        return expr.getExpression();
+                    }).collect(Collectors.joining(" , ")));
         }
     }
 
     /** 构建order by子句 */
-    private static void buildOrderBy(StringBuilder builder,List<OrderItem> sqlOrders,List<Object> params){
-        if(sqlOrders!=null){
-            builder.append(" order by ");
-            sqlOrders.forEach(item -> {
-                params.addAll(item.getSqlField().getParams());
-                builder.append(item.getSqlField().getQualifyField())
-                        .append(item.isAsc()?",":" desc,");
-            });
-            builder.deleteCharAt(builder.length()-1);
+    private static void buildOrderBy(StringBuilder builder,List<OrderExpr> queryOrders,List<Object> params){
+        if(queryOrders!=null && !queryOrders.isEmpty()){
+            builder.append(" order by ").append(
+                    queryOrders.stream().map(expr->{
+                        params.addAll(expr.getParams());
+                        return expr.getExpression();
+                    }).collect(Collectors.joining(" , ")));
         }
     }
 
@@ -176,30 +146,17 @@ public class SqlStatementBuilder {
         }
     }
 
-    private static void buildUnion(StringBuilder builder,List<SqlQuery> sqlQueries,List<Object> params){
-        if(sqlQueries!=null && !sqlQueries.isEmpty()) {
-            sqlQueries.forEach(sq -> {
-                builder.append(" union ");
-                if (sq.isUnionALl()) {
-                    builder.append("all ");
-                }
-                params.addAll(sq.getParams());
-                builder.append(sq.getQualifyField());
-            });
-        }
-    }
-
     /** 构建update sql语句 */
     public static SqlUpdate buildUpdate(UpdateBuilder updateBuilder){
         StringBuilder builder = new StringBuilder();
         List<Object> params = new ArrayList<>(25);
-        builder.append("update ");
+        builder.append("update");
         // 构建update子句
-        buildFromOrUpdate(builder,updateBuilder.getSqlFromTables(),params);
+        buildFromOrUpdate(builder,updateBuilder.getUpdateTables(),params);
         // 构建set子句
         buildSet(builder, updateBuilder,params);
         // 构建where子句
-        buildWhere(builder, updateBuilder.getSqlWhere(),params);
+        buildWhere(builder, updateBuilder.getWhereConditions(),params);
         return new SqlUpdate(builder.toString(),params);
     }
 
@@ -217,7 +174,7 @@ public class SqlStatementBuilder {
         builder.append("delete from ")
                 .append(deleteBuilder.getSqlTaBle().getTableName());
         // 构建where子句
-        buildWhere(builder, deleteBuilder.getSqlWhere(),params);
+        buildWhere(builder, deleteBuilder.getWhereConditions(),params);
         return new SqlDelete(builder.toString(),params);
     }
 }

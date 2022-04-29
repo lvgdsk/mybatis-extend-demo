@@ -7,6 +7,6 @@
         <result property="empNumber" column="emp_number"/>
         <result property="leaderNumber" column="leader_number"/>
         <result property="lvl" column="lvl"/>
-        <collection property="employeeList" resultMap="employeeResultMap" columnPrefix="emp"/>
+        <collection property="employeeList" resultMap="employeeResultMap" columnPrefix="e_"/>
     </resultMap>
 </mapper>

@@ -1,24 +1,27 @@
 package com.example.demo.mbextend;
 
+import com.example.demo.mbextend.sqlparts.SqlField;
 import com.example.demo.mbextend.sqlparts.SqlTaBle;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class QUser implements SqlTaBle {
-	private static String tableName = "user";
+	private static final String tableName = "user";
 	private String tableAlias;
 
 	public QField id;
 	public QField name;
 	public QField birthday;
 
-    public QUser(String tableAlias) {
-        this(tableAlias,null);
+    public QUser() {
+        this(null);
     }
 
-	public QUser(String tableAlias,String columnPrefix) {
-	    this.tableAlias = tableAlias;
-		this.id = new QField(tableAlias,"id",null,columnPrefix);
-		this.name = new QField(tableAlias,"name",null,columnPrefix);
-		this.birthday = new QField(tableAlias,"birthday",null,columnPrefix);
+	public QUser(String columnPrefix) {
+		this.id = new QField(null,"id",null,columnPrefix);
+		this.name = new QField(null,"name",null,columnPrefix);
+		this.birthday = new QField(null,"birthday",null,columnPrefix);
     }
 
 	@Override
@@ -29,5 +32,15 @@ public class QUser implements SqlTaBle {
 	@Override
 	public String getTableAlias() {
 		return tableAlias;
+	}
+
+    @Override
+    public List<SqlField> getAllSqlField() {
+        return Arrays.asList(id,name,birthday);
+    }
+
+	@Override
+	public void setTableAlias(String tableAlias) {
+		this.tableAlias = tableAlias;
 	}
 }

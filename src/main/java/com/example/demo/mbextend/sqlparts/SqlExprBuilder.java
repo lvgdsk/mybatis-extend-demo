@@ -126,23 +126,22 @@ public class SqlExprBuilder {
         return new SqlExpr(expression, strAlias,sqlParams);
     }
 
-    /** 构建比较表达式 */
-    public static SqlCondition buildCompareExpr(SqlField sqlField, SqlOperator sqlOperator, Object param){
+    /** 构建条表达式 */
+    public static ConditionExpr buildConditionExpr(SqlExpr sqlExpr, SqlOperator sqlOperator, Object param){
         List<Object> params = new ArrayList<>(10);
-        params.addAll(sqlField.getParams());
+        params.addAll(sqlExpr.getParams());
 
-        StringBuilder builder = new StringBuilder(sqlField.getQualifyField());
+        StringBuilder builder = new StringBuilder(sqlExpr.getExpression());
         builder.append(" ");
 
         String strParam = null;
         if(param!=null) {
-            if (param instanceof SqlField) {
-                SqlField field = (SqlField) param;
-                params.addAll(field.getParams());
-                strParam = field.getQualifyField();
+            if (param instanceof SqlExpr) {
+                SqlExpr expr = (SqlExpr) param;
+                params.addAll(expr.getParams());
+                strParam = expr.getExpression();
             }
         }
-
         String operator = sqlOperator.operator();
         switch (sqlOperator.dist()){
             case 2:
@@ -188,7 +187,7 @@ public class SqlExprBuilder {
         }else{
             builder.append(operator);
         }
-        return new SqlCondition(builder.toString(),params);
+        return new ConditionExpr(builder.toString(),params);
     }
 
     /** 构建update的赋值set表达式 */
