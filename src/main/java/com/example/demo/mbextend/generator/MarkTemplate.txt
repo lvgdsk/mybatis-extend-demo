@@ -1,8 +1,6 @@
 package $path$;
 
-import $path$.sqlparts.SqlField;
 import $path$.sqlparts.SqlTaBle;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -10,7 +8,8 @@ public class Q$entity$ implements SqlTaBle {
 	private static final String tableName = "$table$";
 	private String tableAlias;
 
-$fieldsDeclare$
+    $fieldsDeclare$
+
     public Q$entity$() {
         this(null);
     }
@@ -35,7 +34,7 @@ $fieldsDeclare$
 	}
 
     @Override
-    public List<SqlField> getAllSqlField() {
+    public List<QField> getQueryColumns() {
         return Arrays.asList($sqlFields$);
     }
 }

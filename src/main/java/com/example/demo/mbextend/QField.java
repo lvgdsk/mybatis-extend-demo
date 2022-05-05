@@ -1,7 +1,6 @@
 package com.example.demo.mbextend;
 
 import com.example.demo.mbextend.sqlparts.SqlExpr;
-import com.example.demo.mbextend.sqlparts.SqlField;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -18,63 +17,50 @@ public class QField implements SqlExpr {
     // 表字段对应的表
     private String tableAlias;
     // 表字段名
-    private String column;
+    private String columnName;
     // 表字段别名
     private String columnAlias;
 
     private List<Object> params;
 
-    public QField(String tableAlias, String column,String columnAlias,String columnPrefix) {
+    public QField(String tableAlias,String columnName) {
         this.tableAlias = tableAlias;
-        this.column = column;
-        if(columnAlias!=null){
-            this.columnAlias = columnAlias;
-        }else if(columnPrefix!=null){
-            this.columnAlias = columnPrefix+"_"+column;
-        }
+        this.columnName = columnName;
         params = Collections.emptyList();
     }
 
-    public QField(String column, String columnAlias, List<Object> params) {
-        this.column = column;
+    private QField(String columnName, String columnAlias, List<Object> params) {
+        this.columnName = columnName;
         this.columnAlias = columnAlias;
         this.params = params;
     }
 
-    public String getQualifyColumn() {
-        if(this.tableAlias!=null) {
-            return this.tableAlias + "." + this.column;
-        }else{
-            return this.column;
-        }
+    public static QField column(Object columnName){
+        return column(columnName,null);
     }
 
-    public static QField column(Object column){
-        return column(column,null);
-    }
-
-    public static QField column(Object column,String columnAlias){
-        String columnStr;
+    public static QField column(Object columnName,String columnAlias){
+        String columnExpr;
         List<Object> params = new ArrayList<>(1);
-        if(column instanceof String){
-            columnStr = (String) column;
+        if(columnName instanceof String){
+            columnExpr = (String) columnName;
         }else{
-            columnStr = "${param}";
-            params.add(column);
+            columnExpr = "${param}";
+            params.add(columnName);
         }
-        return new QField(columnStr,columnAlias,params);
+        return new QField(columnExpr,columnAlias,params);
     }
 
-    public static QField column(String tableAlias,String column,String columnAlias){
-        return new QField(tableAlias,column,columnAlias,null);
-    }
-
-    public String getColumn() {
-        return column;
+    public String getColumnName() {
+        return columnName;
     }
 
     @Override
     public String getExpression() {
-        return getQualifyColumn();
+        if(this.tableAlias!=null) {
+            return this.tableAlias + "." + this.columnName;
+        }else{
+            return this.columnName;
+        }
     }
 }

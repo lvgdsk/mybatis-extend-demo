@@ -2,14 +2,13 @@ package com.example.demo.mbextend.generator;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.example.demo.entity.Employee;
-import com.example.demo.entity.Pet;
-import com.example.demo.entity.User;
+import com.example.demo.entity.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,7 +31,7 @@ public class EntityMarkGenerator {
     // 扩展包路径
     private static final String mbextend = "com/example/demo/mbextend";
     // 要生成标记类的实体类对象
-    private static final List<Class<?>> entityClasses = Arrays.asList(User.class, Pet.class, Employee.class);
+    private static final List<Class<?>> entityClasses = Arrays.asList(Member.class,Order.class,OrderItem.class,Product.class,ProductCategory.class);
 
     public static void main(String[] args){
         String extendPath = sourceDir+mbextend;
@@ -61,8 +60,8 @@ public class EntityMarkGenerator {
                 markTemplate = markTemplate.replaceAll("\\$path\\$", mbextend.replaceAll("/", "."));
                 markTemplate = markTemplate.replaceAll("\\$entity\\$", tClass.getSimpleName());
                 markTemplate = markTemplate.replaceAll("\\$table\\$", tableName);
-                StringBuilder fieldsDeclare = new StringBuilder();
-                StringBuilder fieldInits = new StringBuilder();
+                List<String> fieldsDeclare = new ArrayList<>();
+                List<String> fieldInits = new ArrayList<>();
                 List<Field> fields = new ArrayList<>(Arrays.asList(tClass.getDeclaredFields()));
                 Class<?> superclass = tClass.getSuperclass();
                 if(superclass!=null) {
@@ -70,22 +69,25 @@ public class EntityMarkGenerator {
                 }
                 List<String> qFields = new ArrayList<>();
                 fields.forEach(f->{
-                    TableField tableField = f.getAnnotation(TableField.class);
-                    if(tableField==null || tableField.exist()) {
-                        String column;
-                        if(tableField!=null && !tableField.value().equals("")){
-                            column = tableField.value().toLowerCase();
-                        }else{
-                            column = camelConvert(f.getName());
+                    int modifiers = f.getModifiers();
+                    if(!Modifier.isStatic(modifiers)) {
+                        TableField tableField = f.getAnnotation(TableField.class);
+                        if (tableField == null || tableField.exist()) {
+                            String column;
+                            if (tableField != null && !tableField.value().equals("")) {
+                                column = tableField.value().toLowerCase();
+                            } else {
+                                column = camelConvert(f.getName());
+                            }
+                            fieldsDeclare.add(String.format("public QField %s;", f.getName()));
+                            fieldInits.add(String.format("this.%s = QField.column(\"%s\",columnPrefix==null?null:columnPrefix+\"%s\");",
+                                    f.getName(), column, column));
+                            qFields.add(f.getName());
                         }
-                        fieldsDeclare.append(String.format("\tpublic QField %s;\n", f.getName()));
-                        fieldInits.append(String.format("\n\t\tthis.%s = new QField(null,\"%s\",null,columnPrefix);",
-                                f.getName(), column));
-                        qFields.add(f.getName());
                     }
                 });
-                markTemplate = markTemplate.replaceAll("\\$fieldsDeclare\\$", fieldsDeclare.toString());
-                markTemplate = markTemplate.replaceAll("\\$fieldInits\\$", fieldInits.toString());
+                markTemplate = markTemplate.replaceAll("\\$fieldsDeclare\\$", String.join("\n\t",fieldsDeclare));
+                markTemplate = markTemplate.replaceAll("\\$fieldInits\\$", String.join("\n\t\t",fieldInits));
                 markTemplate = markTemplate.replaceAll("\\$sqlFields\\$", String.join(",",qFields));
             } catch (IOException e) {
                 log.error("文件：{}，读取失败",filePath.toAbsolutePath(),e);

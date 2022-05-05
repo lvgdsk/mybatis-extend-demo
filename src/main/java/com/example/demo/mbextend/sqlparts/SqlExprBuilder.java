@@ -24,10 +24,10 @@ public class SqlExprBuilder {
         for (Object param : params) {
             if(param==null){
                 actParams[index] = "";
-            }else if(param instanceof SqlField) {
-                SqlField sqlField = (SqlField)param;
-                sqlParams.addAll(sqlField.getParams());
-                actParams[index] = sqlField.getQualifyField();
+            }else if(param instanceof SqlExpr) {
+                SqlExpr sqlExpr = (SqlExpr)param;
+                sqlParams.addAll(sqlExpr.getParams());
+                actParams[index] = sqlExpr.getExpression();
             } else if(param instanceof TimeField) {
                 actParams[index] = ((TimeField)param).name();
             }else if(param instanceof Collection){
@@ -48,8 +48,8 @@ public class SqlExprBuilder {
         String expression = exprEnum.expr();
         List<Object> sqlParams = new ArrayList<>(10);
         if (params.length > 0) {
+            String[] actParams = parseColumn(sqlParams,params);
             if (exprEnum == ExprEnum.CASE_SWITCH || exprEnum == ExprEnum.CASE_CONDITION) {
-                String[] actParams = parseColumn(sqlParams,params);
                 int starIndex = 0;
                 if (exprEnum == ExprEnum.CASE_SWITCH) {
                     expression = expression.replace("${field}", actParams[0]);
@@ -69,9 +69,8 @@ public class SqlExprBuilder {
                 }
                 expression = expression.replace("${}", builder);
             } else {
-                String[] actParams = parseColumn(sqlParams,params);
                 if (exprEnum.count() > 0) {
-                    expression = String.format(expression, actParams);
+                    expression = String.format(expression, (Object[])actParams);
                 }
                 if (expression.contains("${}")) {
                     StringBuilder builder = new StringBuilder();
@@ -86,44 +85,43 @@ public class SqlExprBuilder {
         String strAlias;
         if(exprAlias instanceof QField){
             QField qField = (QField)exprAlias;
-            strAlias = qField.getColumnAlias()!=null?qField.getColumnAlias():qField.getColumn();
+            strAlias = qField.getColumnAlias()!=null?qField.getColumnAlias():qField.getColumnName();
         }else{
             strAlias = (String) exprAlias;
         }
-        return new SqlExpr(expression, strAlias, sqlParams);
+        return new ArithFuncExpr(expression, sqlParams,strAlias);
     }
 
     /** 构建窗口函数表达式 */
-    public static SqlExpr buildWindowFunctionExpr(Object exprAlias, ExprEnum exprEnum,
-                                                  List<SqlField> partitions,
-                                                  List<OrderItem> orders,
+    public static SqlExpr buildWindowFunctionExpr(Object exprAlias,
+                                                  ExprEnum exprEnum,
+                                                  List<GroupExpr> partitions,
+                                                  List<OrderExpr> orders,
                                                   Object ... params){
         List<Object> sqlParams = new ArrayList<>(10);
         String expression = exprEnum.expr();
         if(exprEnum.count()>0 && params.length>0){
             String[] actParams = parseColumn(sqlParams,params);
-            expression = String.format(expression,actParams);
+            expression = String.format(expression,(Object[])actParams);
         }
         String groupby = "partition by ";
         String orderby = "order by ";
         if(!CollectionUtils.isEmpty(partitions)){
-            groupby += partitions.stream().map(SqlField::getQualifyField).collect(Collectors.joining(","));
+            groupby += partitions.stream().map(GroupExpr::getExpression).collect(Collectors.joining(","));
         }else{
             groupby = "";
         }
-        orderby += orders.stream().map(item->
-                item.getSqlField().getQualifyField()+" "+(item.isAsc()?"asc":"desc")
-        ).collect(Collectors.joining(","));
+        orderby += orders.stream().map(OrderExpr::getExpression).collect(Collectors.joining(","));
         expression = expression.replace("${group}",groupby);
         expression = expression.replace("${order}",orderby);
         String strAlias;
         if(exprAlias instanceof QField){
             QField qField = (QField)exprAlias;
-            strAlias = qField.getColumnAlias()!=null?qField.getColumnAlias():qField.getColumn();
+            strAlias = qField.getColumnAlias()!=null?qField.getColumnAlias():qField.getColumnName();
         }else{
             strAlias = (String) exprAlias;
         }
-        return new SqlExpr(expression, strAlias,sqlParams);
+        return new ArithFuncExpr(expression, sqlParams,strAlias);
     }
 
     /** 构建条表达式 */
@@ -192,12 +190,12 @@ public class SqlExprBuilder {
 
     /** 构建update的赋值set表达式 */
     public static String buildSetExpr(QField qField,Object param,List<Object> params){
-        StringBuilder builder = new StringBuilder(qField.getQualifyField());
+        StringBuilder builder = new StringBuilder(qField.getExpression());
         builder.append("=");
         String strParam;
-        if(param instanceof SqlField){
-            params.addAll(((SqlField)param).getParams());
-            strParam = ((SqlField)param).getQualifyField();
+        if(param instanceof SqlExpr){
+            params.addAll(((SqlExpr)param).getParams());
+            strParam = ((SqlExpr)param).getExpression();
         }else{
             params.add(param);
             strParam = "${param}";

@@ -1,14 +1,10 @@
 package com.example.demo.mbextend.sqlparts;
 
 import com.example.demo.mbextend.QField;
-import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author lvqi
@@ -43,8 +39,8 @@ public class SqlQuery implements SqlTaBle, SqlExpr, SqlStatement {
 
     public void setTableAlias(String tableAlias) {
         queryColumns = queryColumns.stream().map(column->{
-            String columnName = column.getColumnAlias()==null?column.getColumn():column.getColumnAlias();
-            return new QField(tableAlias,columnName,null,null);
+            String columnName = column.getColumnAlias()==null?column.getColumnName():column.getColumnAlias();
+            return new QField(tableAlias,columnName);
         }).collect(Collectors.toList());
         this.tableAlias = tableAlias;
     }
@@ -60,9 +56,9 @@ public class SqlQuery implements SqlTaBle, SqlExpr, SqlStatement {
     }
 
     public QField column(QField qField){
-        String columnName = qField.getColumnAlias()==null?qField.getColumn():qField.getColumnAlias();
+        String columnName = qField.getColumnAlias()==null?qField.getColumnName():qField.getColumnAlias();
         for (QField field : queryColumns) {
-            if(field.getColumn().equals(columnName)){
+            if(field.getColumnName().equals(columnName)){
                 return field;
             }
         }
@@ -113,9 +109,5 @@ public class SqlQuery implements SqlTaBle, SqlExpr, SqlStatement {
     @Override
     public List<Object> getParams() {
         return params;
-    }
-
-    public QField toQueryColumn(String columnAlias){
-        return new QField(this.sqlStatement,columnAlias,this.params);
     }
 }

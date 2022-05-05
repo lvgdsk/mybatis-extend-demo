@@ -1,14 +1,9 @@
 package com.example.demo.mbextend.sqlparts;
 
-import com.example.demo.mbextend.QField;
 import com.example.demo.mbextend.enums.ConditionCombineType;
-import lombok.Data;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author lvqi
@@ -102,9 +97,5 @@ public class ConditionExpr implements SqlExpr{
 
     public void setParams(List<Object> params) {
         this.params = params;
-    }
-
-    public QField toQueryColumn(String columnAlias){
-        return new QField(this.expression,columnAlias,this.params);
     }
 }

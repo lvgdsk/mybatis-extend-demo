@@ -17,7 +17,7 @@ public class SqlStatementBuilder {
         StringBuilder builder = new StringBuilder();
         List<Object> params = new ArrayList<>(25);
         // 构建cte
-//        buildCte(builder,queryBuilder.getSqlFromTables(),params);
+        buildCte(builder,queryBuilder,params);
         // 构建select子句
         buildSelect(builder, queryBuilder ,params);
         // 构建from子句
@@ -36,8 +36,8 @@ public class SqlStatementBuilder {
         return new SqlQuery(builder.toString(),params,queryBuilder.getQueryColumns());
     }
 
-/*    private static void buildCte(StringBuilder builder, List<FromTable> sqlFromTables, List<Object> params){
-        List<SqlQuery> ctes = sqlFromTables.stream().filter(sft -> {
+    private static void buildCte(StringBuilder builder, QueryBuilder queryBuilder, List<Object> params){
+        List<SqlQuery> ctes = queryBuilder.getQueryTables().stream().filter(sft -> {
             SqlTaBle sqlTaBle = sft.getSqlTaBle();
             return sqlTaBle instanceof SqlQuery && ((SqlQuery) sqlTaBle).isCte();
         }).map(sft-> (SqlQuery)sft.getSqlTaBle()).collect(Collectors.toList());
@@ -45,6 +45,7 @@ public class SqlStatementBuilder {
             return;
         }
         String cteStatement = ctes.stream().map(cte -> {
+
             String cteStr;
             if (cte.isRecursive()) {
                 cteStr = "recursive ";
@@ -52,11 +53,11 @@ public class SqlStatementBuilder {
                 cteStr = "";
             }
             params.addAll(cte.getParams());
-            cteStr += cte.getTableAlias() + " as " + cte.getQualifyField();
+            cteStr += cte.getTableAlias() + " as ";
             return cteStr;
         }).collect(Collectors.joining(","));
         builder.append("with ").append(cteStatement);
-    }*/
+    }
 
     /** 构建select子句 */
     private static void buildSelect(StringBuilder builder, QueryBuilder queryBuilder, List<Object> params){
@@ -66,7 +67,7 @@ public class SqlStatementBuilder {
         }
         queryBuilder.getQueryColumns().forEach( sf ->{
             params.addAll(sf.getParams());
-            builder.append(" ").append(sf.getQualifyColumn());
+            builder.append(" ").append(sf.getExpression());
             if(sf.getColumnAlias()!=null){
                 builder.append(" as ").append(sf.getColumnAlias());
             }

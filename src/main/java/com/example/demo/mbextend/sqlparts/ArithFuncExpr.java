@@ -1,6 +1,5 @@
 package com.example.demo.mbextend.sqlparts;
 
-import com.example.demo.mbextend.QField;
 import com.example.demo.mbextend.enums.ExprEnum;
 
 import java.util.List;
@@ -14,6 +13,13 @@ import java.util.List;
 public class ArithFuncExpr implements SqlExpr{
     private String expression;
     private List<Object> params;
+    private String columnAlias;
+
+    public ArithFuncExpr(String expression, List<Object> params, String columnAlias) {
+        this.expression = expression;
+        this.params = params;
+        this.columnAlias = columnAlias;
+    }
 
     @Override
     public String getExpression() {
@@ -23,10 +29,6 @@ public class ArithFuncExpr implements SqlExpr{
     @Override
     public List<Object> getParams() {
         return null;
-    }
-
-    public QField toQueryColumn(String columnAlias){
-        return new QField(this.expression,columnAlias,this.params);
     }
 
 /** 数学计算 */
@@ -1145,47 +1147,47 @@ public class ArithFuncExpr implements SqlExpr{
     }
 
     /** 分组排序计算行级 */
-    public static SqlExpr overRank(Object alias, List<SqlField> partitions, List<OrderItem> orders){
+    public static SqlExpr overRank(Object alias, List<GroupExpr> partitions, List<OrderExpr> orders){
         return SqlExprBuilder.buildWindowFunctionExpr(alias, ExprEnum.RANK ,partitions,orders);
     }
     /** 关联其它行 */
-    public static SqlExpr overLag(Object alias,List<SqlField> partitions,List<OrderItem> orders,SqlField sqlField,Object param1,Object param2){
-        return SqlExprBuilder.buildWindowFunctionExpr(alias, ExprEnum.LAG ,partitions,orders,sqlField,param1,param2);
+    public static SqlExpr overLag(Object alias,List<GroupExpr> partitions,List<OrderExpr> orders,SqlExpr sqlExpr,Object param1,Object param2){
+        return SqlExprBuilder.buildWindowFunctionExpr(alias, ExprEnum.LAG ,partitions,orders,sqlExpr,param1,param2);
     }
     /** 添加行号 */
-    public static SqlExpr overRow(Object alias, List<SqlField> partitions,List<OrderItem> orders){
+    public static SqlExpr overRow(Object alias, List<GroupExpr> partitions,List<OrderExpr> orders){
         return SqlExprBuilder.buildWindowFunctionExpr(alias, ExprEnum.ROW_NUMBER ,partitions,orders);
     }
     /** 计算（行级/分区总行数） */
-    public static SqlExpr overPercent(Object alias, List<SqlField> partitions,List<OrderItem> orders){
+    public static SqlExpr overPercent(Object alias, List<GroupExpr> partitions,List<OrderExpr> orders){
         return SqlExprBuilder.buildWindowFunctionExpr(alias, ExprEnum.PERCENT_RANK ,partitions,orders);
     }
     /** 平均分配桶号 */
-    public static SqlExpr overNtile(Object alias,List<SqlField> partitions,List<OrderItem> orders,Object param){
+    public static SqlExpr overNtile(Object alias,List<GroupExpr> partitions,List<OrderExpr> orders,Object param){
         return SqlExprBuilder.buildWindowFunctionExpr(alias, ExprEnum.NTILE ,partitions,orders,param);
     }
     /** 查询第n大的表达式 */
-    public static SqlExpr overNthValue(Object alias,List<SqlField> partitions,List<OrderItem> orders,SqlField sqlField,Object param){
-        return SqlExprBuilder.buildWindowFunctionExpr(alias, ExprEnum.NTH_VALUE ,partitions,orders,sqlField,param);
+    public static SqlExpr overNthValue(Object alias,List<GroupExpr> partitions,List<OrderExpr> orders,SqlExpr sqlExpr,Object param){
+        return SqlExprBuilder.buildWindowFunctionExpr(alias, ExprEnum.NTH_VALUE ,partitions,orders,sqlExpr,param);
     }
     /** 关联其它行 */
-    public static SqlExpr overLead(Object alias,List<SqlField> partitions,List<OrderItem> orders,SqlField sqlField,Object param1,Object param2){
-        return SqlExprBuilder.buildWindowFunctionExpr(alias, ExprEnum.LEAD ,partitions,orders,sqlField,param1,param2);
+    public static SqlExpr overLead(Object alias,List<GroupExpr> partitions,List<OrderExpr> orders,SqlExpr sqlExpr,Object param1,Object param2){
+        return SqlExprBuilder.buildWindowFunctionExpr(alias, ExprEnum.LEAD ,partitions,orders,sqlExpr,param1,param2);
     }
     /** 设置首行表达式 */
-    public static SqlExpr overFirst(Object alias,List<SqlField> partitions,List<OrderItem> orders,SqlField sqlField){
-        return SqlExprBuilder.buildWindowFunctionExpr(alias, ExprEnum.FIRST_VALUE ,partitions,orders,sqlField);
+    public static SqlExpr overFirst(Object alias,List<GroupExpr> partitions,List<OrderExpr> orders,SqlExpr sqlExpr){
+        return SqlExprBuilder.buildWindowFunctionExpr(alias, ExprEnum.FIRST_VALUE ,partitions,orders,sqlExpr);
     }
     /** 设置尾行表达式 */
-    public static SqlExpr overLast(Object alias,List<SqlField> partitions,List<OrderItem> orders,SqlField sqlField){
-        return SqlExprBuilder.buildWindowFunctionExpr(alias, ExprEnum.LAST_VALUE ,partitions,orders,sqlField);
+    public static SqlExpr overLast(Object alias,List<GroupExpr> partitions,List<OrderExpr> orders,SqlExpr sqlExpr){
+        return SqlExprBuilder.buildWindowFunctionExpr(alias, ExprEnum.LAST_VALUE ,partitions,orders,sqlExpr);
     }
     /** 分组排序计算行级，类似rank，区别是行级是连续的 */
-    public static SqlExpr overDenseRank(Object alias, List<SqlField> partitions,List<OrderItem> orders){
+    public static SqlExpr overDenseRank(Object alias, List<GroupExpr> partitions,List<OrderExpr> orders){
         return SqlExprBuilder.buildWindowFunctionExpr(alias, ExprEnum.DENSE_RANK ,partitions,orders);
     }
     /** 分组排序计算行级，类似rank，区别是行级是连续的 */
-    public static SqlExpr overCumeDist(Object alias, List<SqlField> partitions,List<OrderItem> orders){
+    public static SqlExpr overCumeDist(Object alias, List<GroupExpr> partitions,List<OrderExpr> orders){
         return SqlExprBuilder.buildWindowFunctionExpr(alias, ExprEnum.CUME_DIST ,partitions,orders);
     }
 }
