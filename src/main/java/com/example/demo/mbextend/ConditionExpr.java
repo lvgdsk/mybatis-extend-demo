@@ -1,4 +1,4 @@
-package com.example.demo.mbextend.sqlparts;
+package com.example.demo.mbextend;
 
 import com.example.demo.mbextend.enums.ConditionCombineType;
 
@@ -10,10 +10,10 @@ import java.util.List;
  * @version 1.0.0
  * @since 2022/2/17 11:08
  */
-public class ConditionExpr implements SqlExpr{
+public class ConditionExpr{
     private String expression;
     private boolean isNeedBracket;
-    private List<Object> params;
+    private final List<Object> params;
 
     public ConditionExpr(String condition,List<Object> params) {
         this.expression = condition;
@@ -48,7 +48,6 @@ public class ConditionExpr implements SqlExpr{
     }
 
     private ConditionExpr combineCondition(ConditionCombineType combineType, ConditionExpr sqlCondition){
-        StringBuilder ConditionBuilder = new StringBuilder();
         String condition1 = this.expression;
         String condition2 = sqlCondition.getExpression();
         if(this.isNeedBracket){
@@ -81,7 +80,6 @@ public class ConditionExpr implements SqlExpr{
         return conditionExpr;
     }
 
-    @Override
     public String getExpression() {
         return expression;
     }
@@ -90,12 +88,7 @@ public class ConditionExpr implements SqlExpr{
         isNeedBracket = needBracket;
     }
 
-    @Override
     public List<Object> getParams() {
         return params;
-    }
-
-    public void setParams(List<Object> params) {
-        this.params = params;
     }
 }

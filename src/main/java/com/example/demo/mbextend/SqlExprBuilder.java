@@ -1,6 +1,5 @@
-package com.example.demo.mbextend.sqlparts;
+package com.example.demo.mbextend;
 
-import com.example.demo.mbextend.QField;
 import com.example.demo.mbextend.enums.ExprEnum;
 import com.example.demo.mbextend.enums.SqlOperator;
 import com.example.demo.mbextend.enums.TimeField;
@@ -12,6 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * 表达式构建类
  * @author lvqi
  * @version 1.0.0
  * @since 2022/2/18 15:23
@@ -27,7 +27,11 @@ public class SqlExprBuilder {
             }else if(param instanceof SqlExpr) {
                 SqlExpr sqlExpr = (SqlExpr)param;
                 sqlParams.addAll(sqlExpr.getParams());
-                actParams[index] = sqlExpr.getExpression();
+                actParams[index] = sqlExpr.getQualifyExpr();
+            }else if(param instanceof ConditionExpr){
+                ConditionExpr expr = (ConditionExpr)param;
+                sqlParams.addAll(expr.getParams());
+                actParams[index] = expr.getExpression();
             } else if(param instanceof TimeField) {
                 actParams[index] = ((TimeField)param).name();
             }else if(param instanceof Collection){
@@ -44,7 +48,7 @@ public class SqlExprBuilder {
     }
 
     /** 构建函数、算式表达式 */
-    public static SqlExpr build(Object exprAlias, ExprEnum exprEnum, Object ... params) {
+    public static ArithFuncExpr build(ExprEnum exprEnum, Object ... params) {
         String expression = exprEnum.expr();
         List<Object> sqlParams = new ArrayList<>(10);
         if (params.length > 0) {
@@ -68,7 +72,8 @@ public class SqlExprBuilder {
                     builder.append("else ").append(actParams[params.length - 1]);
                 }
                 expression = expression.replace("${}", builder);
-            } else {
+            }
+            else {
                 if (exprEnum.count() > 0) {
                     expression = String.format(expression, (Object[])actParams);
                 }
@@ -82,21 +87,13 @@ public class SqlExprBuilder {
                 }
             }
         }
-        String strAlias;
-        if(exprAlias instanceof QField){
-            QField qField = (QField)exprAlias;
-            strAlias = qField.getColumnAlias()!=null?qField.getColumnAlias():qField.getColumnName();
-        }else{
-            strAlias = (String) exprAlias;
-        }
-        return new ArithFuncExpr(expression, sqlParams,strAlias);
+        return new ArithFuncExpr(expression, sqlParams);
     }
 
     /** 构建窗口函数表达式 */
-    public static SqlExpr buildWindowFunctionExpr(Object exprAlias,
-                                                  ExprEnum exprEnum,
-                                                  List<GroupExpr> partitions,
-                                                  List<OrderExpr> orders,
+    public static ArithFuncExpr buildWindowFunctionExpr(ExprEnum exprEnum,
+                                                  List<GroupOrderExpr> partitions,
+                                                  List<GroupOrderExpr> orders,
                                                   Object ... params){
         List<Object> sqlParams = new ArrayList<>(10);
         String expression = exprEnum.expr();
@@ -107,21 +104,15 @@ public class SqlExprBuilder {
         String groupby = "partition by ";
         String orderby = "order by ";
         if(!CollectionUtils.isEmpty(partitions)){
-            groupby += partitions.stream().map(GroupExpr::getExpression).collect(Collectors.joining(","));
+            groupby += partitions.stream().map(GroupOrderExpr::getExpression).collect(Collectors.joining(","));
         }else{
             groupby = "";
         }
-        orderby += orders.stream().map(OrderExpr::getExpression).collect(Collectors.joining(","));
+        orderby += orders.stream().map(GroupOrderExpr::getExpression).collect(Collectors.joining(","));
         expression = expression.replace("${group}",groupby);
         expression = expression.replace("${order}",orderby);
-        String strAlias;
-        if(exprAlias instanceof QField){
-            QField qField = (QField)exprAlias;
-            strAlias = qField.getColumnAlias()!=null?qField.getColumnAlias():qField.getColumnName();
-        }else{
-            strAlias = (String) exprAlias;
-        }
-        return new ArithFuncExpr(expression, sqlParams,strAlias);
+
+        return new ArithFuncExpr(expression, sqlParams);
     }
 
     /** 构建条表达式 */
@@ -129,7 +120,7 @@ public class SqlExprBuilder {
         List<Object> params = new ArrayList<>(10);
         params.addAll(sqlExpr.getParams());
 
-        StringBuilder builder = new StringBuilder(sqlExpr.getExpression());
+        StringBuilder builder = new StringBuilder(sqlExpr.getQualifyExpr());
         builder.append(" ");
 
         String strParam = null;
@@ -137,7 +128,11 @@ public class SqlExprBuilder {
             if (param instanceof SqlExpr) {
                 SqlExpr expr = (SqlExpr) param;
                 params.addAll(expr.getParams());
-                strParam = expr.getExpression();
+                strParam = expr.getQualifyExpr();
+            }else if(param instanceof SqlQuery){
+                SqlQuery sqlQuery = (SqlQuery)param;
+                params.addAll(sqlQuery.getParams());
+                strParam = sqlQuery.getSqlStatement();
             }
         }
         String operator = sqlOperator.operator();
@@ -189,13 +184,13 @@ public class SqlExprBuilder {
     }
 
     /** 构建update的赋值set表达式 */
-    public static String buildSetExpr(QField qField,Object param,List<Object> params){
-        StringBuilder builder = new StringBuilder(qField.getExpression());
+    public static String buildSetExpr(QColumn qColumn, Object param, List<Object> params){
+        StringBuilder builder = new StringBuilder(qColumn.getQualifyExpr());
         builder.append("=");
         String strParam;
         if(param instanceof SqlExpr){
             params.addAll(((SqlExpr)param).getParams());
-            strParam = ((SqlExpr)param).getExpression();
+            strParam = ((SqlExpr)param).getQualifyExpr();
         }else{
             params.add(param);
             strParam = "${param}";

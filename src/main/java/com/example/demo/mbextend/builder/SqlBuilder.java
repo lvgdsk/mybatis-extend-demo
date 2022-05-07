@@ -1,6 +1,6 @@
 package com.example.demo.mbextend.builder;
 
-import com.example.demo.mbextend.sqlparts.SqlTaBle;
+import com.example.demo.mbextend.SqlTaBle;
 
 /**
  * @author lvqi

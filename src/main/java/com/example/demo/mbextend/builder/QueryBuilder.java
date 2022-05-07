@@ -1,9 +1,7 @@
 package com.example.demo.mbextend.builder;
 
-import com.example.demo.mbextend.QField;
+import com.example.demo.mbextend.*;
 import com.example.demo.mbextend.enums.JoinType;
-import com.example.demo.mbextend.sqlparts.*;
-import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,25 +13,20 @@ import java.util.List;
  * @since 2022/1/21 10:08
  * 定义查询语句
  */
-@Data
 public class QueryBuilder {
 
-    private List<QueryTable> queryTables;
-    private List<QField> queryColumns;
+    private final List<QueryTable> queryTables = new ArrayList<>(8);
+    private List<SqlExpr> queryColumns;
     private List<ConditionExpr> whereConditions;
-    private List<OrderExpr> queryOrders;
-    private List<GroupExpr> queryGroups;
+    private List<GroupOrderExpr> queryOrders;
+    private List<GroupOrderExpr> queryGroups;
     private List<ConditionExpr> HavingConditions;
     private boolean distinct;
     private Integer selectCount;
     private Integer selectOffset;
-    private int index;
     private boolean hadEndFrom;
 
     private QueryBuilder(SqlTaBle sqlTaBle) {
-        this.index = 1;
-        this.queryTables = new ArrayList<>(8);
-        sqlTaBle.setTableAlias("t"+this.index);
         this.queryTables.add(new QueryTable(sqlTaBle));
     }
 
@@ -41,30 +34,23 @@ public class QueryBuilder {
         return new QueryBuilder(sqlTaBle);
     }
 
-    public QueryBuilder join(SqlTaBle sqlTaBle, ConditionExpr joinCondition){
-        if(hadEndFrom){
-            throw new RuntimeException("join子句需紧随from子句后");
-        }
-        sqlTaBle.setTableAlias("t"+(++this.index));
-        this.queryTables.add(new QueryTable(sqlTaBle,joinCondition, JoinType.INNER_JOIN));
-        return this;
+    public QueryBuilder innerJoin(SqlTaBle sqlTaBle,ConditionExpr joinCondition){
+        return joinTable(sqlTaBle,JoinType.INNER_JOIN,joinCondition);
     }
 
-    public QueryBuilder leftjoin(SqlTaBle sqlTaBle, ConditionExpr joinCondition){
-        if(hadEndFrom){
-            throw new RuntimeException("join子句需紧随from子句后");
-        }
-        sqlTaBle.setTableAlias("t"+(++this.index));
-        this.queryTables.add(new QueryTable(sqlTaBle,joinCondition,JoinType.LEFT_JOIN));
-        return this;
+    public QueryBuilder leftJoin(SqlTaBle sqlTaBle,ConditionExpr joinCondition){
+        return joinTable(sqlTaBle,JoinType.LEFT_JOIN,joinCondition);
     }
 
-    public QueryBuilder rightjoin(SqlTaBle sqlTaBle, ConditionExpr joinCondition){
+    public QueryBuilder rightJoin(SqlTaBle sqlTaBle,ConditionExpr joinCondition){
+        return joinTable(sqlTaBle,JoinType.RIGHT_JOIN,joinCondition);
+    }
+
+    private  QueryBuilder joinTable(SqlTaBle sqlTaBle,JoinType joinType,ConditionExpr joinCondition){
         if(hadEndFrom){
             throw new RuntimeException("join子句需紧随from子句后");
         }
-        sqlTaBle.setTableAlias("t"+(++this.index));
-        this.queryTables.add(new QueryTable(sqlTaBle,joinCondition,JoinType.RIGHT_JOIN));
+        this.queryTables.add(new QueryTable(sqlTaBle,joinType,joinCondition));
         return this;
     }
 
@@ -79,8 +65,11 @@ public class QueryBuilder {
             this.queryColumns = new ArrayList<>(20);
         }
         for (SqlTaBle sqlTaBle : sqlTaBles) {
-            sqlTaBle.getQueryColumns().forEach(sf->{
-                if(!this.queryColumns.contains(sf)){
+            if(sqlTaBle instanceof SqlQuery){
+                ((SqlQuery)sqlTaBle).changeColumn();
+            }
+            MBUtil.getQColumns(sqlTaBle).forEach(sf -> {
+                if (!this.queryColumns.contains(sf)) {
                     this.queryColumns.add(sf);
                 }
             });
@@ -89,13 +78,13 @@ public class QueryBuilder {
         return this;
     }
 
-    public QueryBuilder select(QField ... qFields){
+    public QueryBuilder select(SqlExpr... sqlExprs){
         if(this.queryColumns==null){
             this.queryColumns = new ArrayList<>(20);
         }
-        for (QField qField : qFields) {
-            if(!this.queryColumns.contains(qField)){
-                this.queryColumns.add(qField);
+        for (SqlExpr sqlExpr : sqlExprs) {
+            if(!this.queryColumns.contains(sqlExpr)){
+                this.queryColumns.add(sqlExpr);
             }
         }
         this.hadEndFrom = true;
@@ -112,7 +101,7 @@ public class QueryBuilder {
         return this;
     }
 
-    public QueryBuilder orderBy(OrderExpr ... orderExprList){
+    public QueryBuilder orderBy(GroupOrderExpr ... orderExprList){
         this.queryOrders = new ArrayList<>(Arrays.asList(orderExprList));
         this.hadEndFrom = true;
         return this;
@@ -138,7 +127,7 @@ public class QueryBuilder {
         return this;
     }
 
-    public QueryBuilder groupBy(GroupExpr ... groupExprList){
+    public QueryBuilder groupBy(GroupOrderExpr... groupExprList){
         this.queryGroups = new ArrayList<>(Arrays.asList(groupExprList));
         this.hadEndFrom = true;
         return this;
@@ -155,5 +144,41 @@ public class QueryBuilder {
             queryTables.forEach(sft-> select(sft.getSqlTaBle()));
         }
         return SqlStatementBuilder.buildQuery(this);
+    }
+
+    List<QueryTable> getQueryTables() {
+        return queryTables;
+    }
+
+    List<SqlExpr> getQueryColumns() {
+        return queryColumns;
+    }
+
+    List<ConditionExpr> getWhereConditions() {
+        return whereConditions;
+    }
+
+    List<GroupOrderExpr> getQueryOrders() {
+        return queryOrders;
+    }
+
+    List<GroupOrderExpr> getQueryGroups() {
+        return queryGroups;
+    }
+
+    List<ConditionExpr> getHavingConditions() {
+        return HavingConditions;
+    }
+
+    boolean isDistinct() {
+        return distinct;
+    }
+
+    Integer getSelectCount() {
+        return selectCount;
+    }
+
+    Integer getSelectOffset() {
+        return selectOffset;
     }
 }

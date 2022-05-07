@@ -1,7 +1,7 @@
 package com.example.demo.mbextend.builder;
 
+import com.example.demo.mbextend.*;
 import com.example.demo.mbextend.enums.JoinType;
-import com.example.demo.mbextend.sqlparts.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +16,9 @@ public class SqlStatementBuilder {
     public static SqlQuery buildQuery(QueryBuilder queryBuilder){
         StringBuilder builder = new StringBuilder();
         List<Object> params = new ArrayList<>(25);
+        List<Object> cteParams = new ArrayList<>(10);
         // 构建cte
-        buildCte(builder,queryBuilder,params);
+        String cteStatement = buildCte(queryBuilder,cteParams);
         // 构建select子句
         buildSelect(builder, queryBuilder ,params);
         // 构建from子句
@@ -32,31 +33,28 @@ public class SqlStatementBuilder {
         buildOrderBy(builder, queryBuilder.getQueryOrders(),params);
         // 构建limit子句
         buildLimit(builder, queryBuilder);
-
-        return new SqlQuery(builder.toString(),params,queryBuilder.getQueryColumns());
+        return new SqlQuery(builder.toString(),cteStatement,params,cteParams,queryBuilder.getQueryColumns());
     }
 
-    private static void buildCte(StringBuilder builder, QueryBuilder queryBuilder, List<Object> params){
+    private static String buildCte(QueryBuilder queryBuilder, List<Object> params){
         List<SqlQuery> ctes = queryBuilder.getQueryTables().stream().filter(sft -> {
             SqlTaBle sqlTaBle = sft.getSqlTaBle();
             return sqlTaBle instanceof SqlQuery && ((SqlQuery) sqlTaBle).isCte();
         }).map(sft-> (SqlQuery)sft.getSqlTaBle()).collect(Collectors.toList());
         if(ctes.isEmpty()){
-            return;
+            return null;
         }
-        String cteStatement = ctes.stream().map(cte -> {
-
-            String cteStr;
-            if (cte.isRecursive()) {
-                cteStr = "recursive ";
-            } else {
-                cteStr = "";
+        return ctes.stream().map(cte -> {
+            StringBuilder cteItem = new StringBuilder();
+            if (MBUtil.isRecursive(cte)) {
+                cteItem.append("recursive ");
             }
             params.addAll(cte.getParams());
-            cteStr += cte.getTableAlias() + " as ";
-            return cteStr;
+            cteItem.append(cte.getTableAlias())
+                    .append(" as ")
+                    .append(cte.getSqlStatement());
+            return cteItem;
         }).collect(Collectors.joining(","));
-        builder.append("with ").append(cteStatement);
     }
 
     /** 构建select子句 */
@@ -65,11 +63,11 @@ public class SqlStatementBuilder {
         if(queryBuilder.isDistinct()){
             builder.append(" distinct");
         }
-        queryBuilder.getQueryColumns().forEach( sf ->{
-            params.addAll(sf.getParams());
-            builder.append(" ").append(sf.getExpression());
-            if(sf.getColumnAlias()!=null){
-                builder.append(" as ").append(sf.getColumnAlias());
+        queryBuilder.getQueryColumns().forEach( expr ->{
+            params.addAll(expr.getParams());
+            builder.append(" ").append(expr.getQualifyExpr());
+            if(expr.getColumnAlias()!=null){
+                builder.append(" as ").append(expr.getColumnAlias());
             }
             builder.append(",");
         });
@@ -82,7 +80,7 @@ public class SqlStatementBuilder {
         buildFromOrUpdate(builder,queryBuilder.getQueryTables(),params);
     }
 
-    private static void buildFromOrUpdate(StringBuilder builder,List<QueryTable> queryTables,List<Object> params){
+    private static void buildFromOrUpdate(StringBuilder builder, List<QueryTable> queryTables, List<Object> params){
         queryTables.forEach(qt -> {
             SqlTaBle sqlTaBle = qt.getSqlTaBle();
             JoinType joinType = qt.getJoinType();
@@ -90,12 +88,13 @@ public class SqlStatementBuilder {
             if(joinType!=null){
                 builder.append(" ").append(joinType.value());
             }
-            if(sqlTaBle instanceof SqlQuery){
+            if(sqlTaBle instanceof SqlQuery && !((SqlQuery)sqlTaBle).isCte()){
                 params.addAll(((SqlQuery)sqlTaBle).getParams());
             }
-            builder.append(" ").append(sqlTaBle.getTableName());
-            if(sqlTaBle.getTableAlias()!=null){
-                builder.append(" as ").append(sqlTaBle.getTableAlias());
+            builder.append(" ").append(MBUtil.getTableName(sqlTaBle));
+            String tableAlias = MBUtil.getTableAlias(sqlTaBle);
+            if(tableAlias!=null && (!(sqlTaBle instanceof SqlQuery) || !((SqlQuery)sqlTaBle).isCte())){
+                builder.append(" as ").append(tableAlias);
             }
             if(joinCondition!=null){
                 params.addAll(joinCondition.getParams());
@@ -116,7 +115,7 @@ public class SqlStatementBuilder {
     }
 
     /** 构建group by子句 */
-    private static void buildGroupBy(StringBuilder builder,List<GroupExpr> queryGroups,List<Object> params){
+    private static void buildGroupBy(StringBuilder builder, List<GroupOrderExpr> queryGroups, List<Object> params){
         if(queryGroups!=null && !queryGroups.isEmpty()){
             builder.append(" group by ").append(
                     queryGroups.stream().map(expr->{
@@ -127,7 +126,7 @@ public class SqlStatementBuilder {
     }
 
     /** 构建order by子句 */
-    private static void buildOrderBy(StringBuilder builder,List<OrderExpr> queryOrders,List<Object> params){
+    private static void buildOrderBy(StringBuilder builder, List<GroupOrderExpr> queryOrders, List<Object> params){
         if(queryOrders!=null && !queryOrders.isEmpty()){
             builder.append(" order by ").append(
                     queryOrders.stream().map(expr->{
@@ -173,7 +172,7 @@ public class SqlStatementBuilder {
         StringBuilder builder = new StringBuilder();
         List<Object> params = new ArrayList<>(10);
         builder.append("delete from ")
-                .append(deleteBuilder.getSqlTaBle().getTableName());
+                .append(MBUtil.getTableName(deleteBuilder.getSqlTaBle()));
         // 构建where子句
         buildWhere(builder, deleteBuilder.getWhereConditions(),params);
         return new SqlDelete(builder.toString(),params);

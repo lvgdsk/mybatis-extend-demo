@@ -1,9 +1,7 @@
 package com.example.demo.mbextend.builder;
 
-import com.example.demo.mbextend.QField;
+import com.example.demo.mbextend.*;
 import com.example.demo.mbextend.enums.JoinType;
-import com.example.demo.mbextend.sqlparts.*;
-import lombok.Data;
 
 import java.util.*;
 
@@ -13,59 +11,47 @@ import java.util.*;
  * @since 2022/1/27 15:17
  * 定义更新语句
  */
-@Data
 public class UpdateBuilder {
-    private List<QueryTable> updateTables;
+    private final List<QueryTable> updateTables = new ArrayList<>(8);
     private Set<String> sqlSets;
     private List<ConditionExpr> whereConditions;
-    List<Object> params;
-    private int index;
+    List<Object> params = new ArrayList<>(16);
     private boolean hadEndFrom;
 
     private UpdateBuilder(SqlTaBle sqlTaBle) {
-        this.index = 1;
-        updateTables = new ArrayList<>(8);
-        sqlTaBle.setTableAlias("t"+this.index);
+
         updateTables.add(new QueryTable(sqlTaBle));
-        params = new ArrayList<>(16);
     }
 
     public static UpdateBuilder update(SqlTaBle sqlTaBle){
         return new UpdateBuilder(sqlTaBle);
     }
 
-    public UpdateBuilder join(SqlTaBle sqlTaBle, ConditionExpr joinCondition){
+    public UpdateBuilder innerJoin(SqlTaBle sqlTaBle,ConditionExpr joinCondition){
+        return joinTable(sqlTaBle,JoinType.INNER_JOIN,joinCondition);
+    }
+
+    public UpdateBuilder leftJoin(SqlTaBle sqlTaBle,ConditionExpr joinCondition){
+        return joinTable(sqlTaBle,JoinType.LEFT_JOIN,joinCondition);
+    }
+
+    public UpdateBuilder rightJoin(SqlTaBle sqlTaBle,ConditionExpr joinCondition){
+        return joinTable(sqlTaBle,JoinType.RIGHT_JOIN,joinCondition);
+    }
+
+    private UpdateBuilder joinTable(SqlTaBle sqlTaBle,JoinType joinType,ConditionExpr joinCondition){
         if(hadEndFrom){
             throw new RuntimeException("join子句需紧随from子句后");
         }
-        sqlTaBle.setTableAlias("t"+(++this.index));
-        this.updateTables.add(new QueryTable(sqlTaBle,joinCondition, JoinType.INNER_JOIN));
+        this.updateTables.add(new QueryTable(sqlTaBle,joinType,joinCondition));
         return this;
     }
 
-    public UpdateBuilder leftjoin(SqlTaBle sqlTaBle, ConditionExpr joinCondition){
-        if(hadEndFrom){
-            throw new RuntimeException("join子句需紧随from子句后");
-        }
-        sqlTaBle.setTableAlias("t"+(++this.index));
-        this.updateTables.add(new QueryTable(sqlTaBle,joinCondition,JoinType.LEFT_JOIN));
-        return this;
-    }
-
-    public UpdateBuilder rightjoin(SqlTaBle sqlTaBle, ConditionExpr joinCondition){
-        if(hadEndFrom){
-            throw new RuntimeException("join子句需紧随from子句后");
-        }
-        sqlTaBle.setTableAlias("t"+(++this.index));
-        this.updateTables.add(new QueryTable(sqlTaBle,joinCondition,JoinType.RIGHT_JOIN));
-        return this;
-    }
-
-    public UpdateBuilder set(QField qField, Object value){
+    public UpdateBuilder set(QColumn qColumn, Object value){
         if(sqlSets==null){
             sqlSets = new HashSet<>(10);
         }
-        sqlSets.add(SqlExprBuilder.buildSetExpr(qField,value,this.params));
+        sqlSets.add(SqlExprBuilder.buildSetExpr(qColumn,value,this.params));
         hadEndFrom = true;
         return this;
     }
@@ -82,5 +68,21 @@ public class UpdateBuilder {
 
     public SqlUpdate build(){
         return SqlStatementBuilder.buildUpdate(this);
+    }
+
+    List<QueryTable> getUpdateTables() {
+        return updateTables;
+    }
+
+    Set<String> getSqlSets() {
+        return sqlSets;
+    }
+
+    List<ConditionExpr> getWhereConditions() {
+        return whereConditions;
+    }
+
+    List<Object> getParams() {
+        return params;
     }
 }

@@ -9,6 +9,12 @@
         <result column="phone" property="phone" />
         <result column="birthday" property="birthday" />
         <result column="gender" property="gender" />
+        <collection property="orders" ofType="com.example.demo.entity.Order" columnPrefix="ord_">
+            <id column="id" property="id"/>
+            <result column="status" property="status"/>
+            <result column="create_time" property="createTime"/>
+            <result column="total_price" property="totalPrice"/>
+        </collection>
     </resultMap>
 
     <!-- 通用查询结果列 -->

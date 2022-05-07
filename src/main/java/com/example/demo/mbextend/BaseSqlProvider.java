@@ -1,11 +1,7 @@
 package com.example.demo.mbextend;
 
-import com.example.demo.mbextend.sqlparts.SqlDelete;
-import com.example.demo.mbextend.sqlparts.SqlQuery;
-import com.example.demo.mbextend.sqlparts.SqlUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
@@ -26,7 +22,7 @@ public class BaseSqlProvider {
 
     /** 构建select sql语句 */
     public static String select(SqlQuery sqlQuery){
-        return fillParams(sqlQuery.getSqlStatement(),sqlQuery.getParams(),"sqlQuery");
+        return fillParams(sqlQuery.getFinalSqlStatement(),sqlQuery.getSqlParams(),"sqlQuery");
     }
 
     /** 构建update sql语句 */
@@ -42,7 +38,7 @@ public class BaseSqlProvider {
 
     private static String fillParams(String sqlStatement,List<Object> params,String paramName){
         for (int i = 0; i <params.size(); i++) {
-            sqlStatement = sqlStatement.replaceFirst("\\$\\{param}",String.format("#{%s.params[%d]}",paramName,i));
+            sqlStatement = sqlStatement.replaceFirst("\\$\\{param}",String.format("#{%s.sqlParams[%d]}",paramName,i));
         }
         if(logger.isDebugEnabled()) {
             // 打印 sql 语句

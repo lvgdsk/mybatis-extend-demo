@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableField;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -43,5 +44,6 @@ public class Member implements Serializable {
     @TableField("gender")
     private String gender;
 
-
+    @TableField(exist = false)
+    private List<Order> orders;
 }

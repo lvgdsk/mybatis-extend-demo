@@ -67,7 +67,7 @@ public class EntityMarkGenerator {
                 if(superclass!=null) {
                     fields.addAll(Arrays.asList(superclass.getDeclaredFields()));
                 }
-                List<String> qFields = new ArrayList<>();
+                List<String> qColumns = new ArrayList<>();
                 fields.forEach(f->{
                     int modifiers = f.getModifiers();
                     if(!Modifier.isStatic(modifiers)) {
@@ -79,22 +79,22 @@ public class EntityMarkGenerator {
                             } else {
                                 column = camelConvert(f.getName());
                             }
-                            fieldsDeclare.add(String.format("public QField %s;", f.getName()));
-                            fieldInits.add(String.format("this.%s = QField.column(\"%s\",columnPrefix==null?null:columnPrefix+\"%s\");",
+                            fieldsDeclare.add(String.format("public final QColumn %s;", f.getName()));
+                            fieldInits.add(String.format("this.%s = new QColumn(tableAlias,\"%s\",columnPrefix==null?null:columnPrefix+\"%s\");",
                                     f.getName(), column, column));
-                            qFields.add(f.getName());
+                            qColumns.add(f.getName());
                         }
                     }
                 });
                 markTemplate = markTemplate.replaceAll("\\$fieldsDeclare\\$", String.join("\n\t",fieldsDeclare));
                 markTemplate = markTemplate.replaceAll("\\$fieldInits\\$", String.join("\n\t\t",fieldInits));
-                markTemplate = markTemplate.replaceAll("\\$sqlFields\\$", String.join(",",qFields));
+                markTemplate = markTemplate.replaceAll("\\$sqlColumns\\$", String.join(",",qColumns));
             } catch (IOException e) {
                 log.error("文件：{}，读取失败",filePath.toAbsolutePath(),e);
                 return;
             }
 
-            File javaFile = new File(path.toAbsolutePath()+"/Q"+tClass.getSimpleName()+".java");
+            File javaFile = new File(path.toAbsolutePath()+"/markentity/Q"+tClass.getSimpleName()+".java");
             try {
                 Files.deleteIfExists(javaFile.toPath());
             } catch (IOException e) {

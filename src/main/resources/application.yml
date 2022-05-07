@@ -8,8 +8,6 @@ spring:
   mvc:
     logRequestDetails: true
 
-debug: true
-
 logging:
   level:
     com:

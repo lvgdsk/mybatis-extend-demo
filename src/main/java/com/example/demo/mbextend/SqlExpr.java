@@ -1,4 +1,4 @@
-package com.example.demo.mbextend.sqlparts;
+package com.example.demo.mbextend;
 
 import com.example.demo.mbextend.enums.SqlOperator;
 
@@ -13,6 +13,8 @@ import java.util.List;
 public interface SqlExpr{
     String getExpression();
     List<Object> getParams();
+    String getColumnAlias();
+    String getQualifyExpr();
 
     default ConditionExpr isNull(){
         return SqlExprBuilder.buildConditionExpr(this, SqlOperator.ISN,null);
@@ -27,7 +29,7 @@ public interface SqlExpr{
     }
 
     default ConditionExpr nq(Object param){
-        return SqlExprBuilder.buildConditionExpr(this,SqlOperator.NQ,param);
+        return SqlExprBuilder.buildConditionExpr(this,SqlOperator.NE,param);
     }
 
     default ConditionExpr gt(Object param){
@@ -106,19 +108,19 @@ public interface SqlExpr{
         return SqlExprBuilder.buildConditionExpr(this,SqlOperator.REG,param);
     }
 
-    default OrderExpr orderAsc(){
-        return new OrderExpr(getExpression(),getParams());
+    default GroupOrderExpr orderAsc(){
+        return new GroupOrderExpr(getQualifyExpr(),getParams());
     }
 
-    default OrderExpr orderDesc(){
-        return new OrderExpr(getExpression()+ " desc",getParams());
+    default GroupOrderExpr orderDesc(){
+        return new GroupOrderExpr(getQualifyExpr()+ " desc",getParams());
     }
 
-    default GroupExpr groupAsc(){
-        return new GroupExpr(getExpression(),getParams());
+    default GroupOrderExpr groupAsc(){
+        return new GroupOrderExpr(getQualifyExpr(),getParams());
     }
 
-    default GroupExpr groupDesc(){
-        return new GroupExpr(getExpression()+ " desc",getParams());
+    default GroupOrderExpr groupDesc(){
+        return new GroupOrderExpr(getQualifyExpr()+ " desc",getParams());
     }
 }

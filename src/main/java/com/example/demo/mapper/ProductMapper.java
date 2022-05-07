@@ -2,11 +2,10 @@ package com.example.demo.mapper;
 
 import com.example.demo.entity.Product;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.example.demo.entity.ProductCategory;
 import com.example.demo.mbextend.BaseSqlProvider;
-import com.example.demo.mbextend.sqlparts.SqlDelete;
-import com.example.demo.mbextend.sqlparts.SqlQuery;
-import com.example.demo.mbextend.sqlparts.SqlUpdate;
+import com.example.demo.mbextend.SqlDelete;
+import com.example.demo.mbextend.SqlQuery;
+import com.example.demo.mbextend.SqlUpdate;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;

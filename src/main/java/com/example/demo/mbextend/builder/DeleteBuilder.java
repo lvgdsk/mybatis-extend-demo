@@ -1,9 +1,8 @@
 package com.example.demo.mbextend.builder;
 
-import com.example.demo.mbextend.sqlparts.ConditionExpr;
-import com.example.demo.mbextend.sqlparts.SqlDelete;
-import com.example.demo.mbextend.sqlparts.SqlTaBle;
-import lombok.Data;
+import com.example.demo.mbextend.ConditionExpr;
+import com.example.demo.mbextend.SqlDelete;
+import com.example.demo.mbextend.SqlTaBle;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,7 +14,6 @@ import java.util.List;
  * @since 2022/1/27 17:17
  * 定义删除语句
  */
-@Data
 public class DeleteBuilder {
     private SqlTaBle sqlTaBle;
     private List<ConditionExpr> whereConditions;
@@ -39,5 +37,13 @@ public class DeleteBuilder {
 
     public SqlDelete build(){
         return SqlStatementBuilder.buildDelete(this);
+    }
+
+    SqlTaBle getSqlTaBle() {
+        return sqlTaBle;
+    }
+
+    List<ConditionExpr> getWhereConditions() {
+        return whereConditions;
     }
 }

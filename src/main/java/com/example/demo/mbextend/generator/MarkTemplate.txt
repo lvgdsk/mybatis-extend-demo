@@ -1,12 +1,15 @@
-package $path$;
+package $path$.markentity;
 
-import $path$.sqlparts.SqlTaBle;
+import $path$.AliasWorker;
+import $path$.SqlExpr;
+import $path$.SqlTaBle;
+import $path$.QColumn;
 import java.util.Arrays;
 import java.util.List;
 
-public class Q$entity$ implements SqlTaBle {
-	private static final String tableName = "$table$";
-	private String tableAlias;
+public class Q$entity$ extends SqlTaBle {
+	private static final String tableName = "`$table$`";
+	private final String tableAlias;
 
     $fieldsDeclare$
 
@@ -15,26 +18,19 @@ public class Q$entity$ implements SqlTaBle {
     }
 
 	public Q$entity$(String columnPrefix) {
+	    tableAlias = AliasWorker.getAlias();
         $fieldInits$
     }
 
-	@Override
-	public String getTableName() {
-		return Q$entity$.tableName;
+	protected String getTableName() {
+		return tableName;
 	}
 
-    @Override
-    public void setTableAlias(String tableAlias) {
-        this.tableAlias = tableAlias;
-    }
-
-	@Override
-	public String getTableAlias() {
-		return this.tableAlias;
+	protected String getTableAlias() {
+		return tableAlias;
 	}
 
-    @Override
-    public List<QField> getQueryColumns() {
-        return Arrays.asList($sqlFields$);
+    protected List<SqlExpr> getQColumns() {
+        return Arrays.asList($sqlColumns$);
     }
 }
