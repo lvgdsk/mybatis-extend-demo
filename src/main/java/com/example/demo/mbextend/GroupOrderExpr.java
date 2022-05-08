@@ -12,7 +12,7 @@ public class GroupOrderExpr {
     private final String expression;
     private final List<Object> params;
 
-    public GroupOrderExpr(String expression, List<Object> params) {
+    GroupOrderExpr(String expression, List<Object> params) {
         this.expression = expression;
         this.params = params;
     }

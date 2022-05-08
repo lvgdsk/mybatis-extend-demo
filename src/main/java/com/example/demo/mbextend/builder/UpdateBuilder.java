@@ -19,7 +19,6 @@ public class UpdateBuilder {
     private boolean hadEndFrom;
 
     private UpdateBuilder(SqlTaBle sqlTaBle) {
-
         updateTables.add(new QueryTable(sqlTaBle));
     }
 

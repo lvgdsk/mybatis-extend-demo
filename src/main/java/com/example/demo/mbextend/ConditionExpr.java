@@ -15,7 +15,7 @@ public class ConditionExpr{
     private boolean isNeedBracket;
     private final List<Object> params;
 
-    public ConditionExpr(String condition,List<Object> params) {
+    ConditionExpr(String condition,List<Object> params) {
         this.expression = condition;
         this.params = params;
     }
@@ -80,15 +80,15 @@ public class ConditionExpr{
         return conditionExpr;
     }
 
-    public String getExpression() {
+    String getExpression() {
         return expression;
     }
 
-    public void setNeedBracket(boolean needBracket) {
+    private void setNeedBracket(boolean needBracket) {
         isNeedBracket = needBracket;
     }
 
-    public List<Object> getParams() {
+    List<Object> getParams() {
         return params;
     }
 }

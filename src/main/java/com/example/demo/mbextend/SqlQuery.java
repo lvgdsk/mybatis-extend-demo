@@ -25,7 +25,7 @@ public class SqlQuery extends SqlTaBle{
     private final List<Object> cteParams;
     private List<Object> sqlParams;
 
-    public SqlQuery(String sqlStatement,String cteStatement,List<Object> params,List<Object> cteParams,List<SqlExpr> queryColumns) {
+    protected SqlQuery(String sqlStatement,String cteStatement,List<Object> params,List<Object> cteParams,List<SqlExpr> queryColumns) {
         this.tableAlias = AliasWorker.getAlias();
         this.sqlStatement = sqlStatement;
         this.cteStatement = cteStatement;
@@ -35,7 +35,7 @@ public class SqlQuery extends SqlTaBle{
     }
 
     @Override
-    public String getTableName() {
+    protected String getTableName() {
         if(isCte){
             return String.valueOf(tableAlias);
         }
@@ -43,16 +43,12 @@ public class SqlQuery extends SqlTaBle{
     }
 
     @Override
-    public String getTableAlias() {
+    protected String getTableAlias() {
         return String.valueOf(tableAlias);
     }
 
-    public void setQColumns(List<SqlExpr> queryColumns) {
-        this.queryColumns = queryColumns;
-    }
-
     @Override
-    public List<SqlExpr> getQColumns() {
+    protected List<SqlExpr> getQColumns() {
         return queryColumns;
     }
 
@@ -118,19 +114,19 @@ public class SqlQuery extends SqlTaBle{
         this.isCte = true;
     }
 
-    public boolean isCte() {
+    boolean isCte() {
         return isCte;
     }
 
-    public String getSqlStatement() {
+    String getSqlStatement() {
         return "("+sqlStatement+")";
     }
 
-    public List<Object> getParams() {
+    List<Object> getParams() {
         return params;
     }
 
-    public String getFinalSqlStatement(){
+    String getFinalSqlStatement(){
         if(cteStatement!=null){
             return "with "+cteStatement + sqlStatement;
         }else{
@@ -138,7 +134,7 @@ public class SqlQuery extends SqlTaBle{
         }
     }
 
-    public void changeColumn(){
+    void changeColumn(){
         if(!hadChangColumn){
             queryColumns = queryColumns.stream().map(expr ->
                     new QColumn(tableAlias, expr.getColumnAlias() == null ?

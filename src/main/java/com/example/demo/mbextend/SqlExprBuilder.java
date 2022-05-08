@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  */
 public class SqlExprBuilder {
     /** 参数解析 */
-    private static String[] parseColumn(List<Object> sqlParams,Object ... params){
+    private static String[] parseParam(List<Object> sqlParams,Object ... params){
         String[] actParams = new String[params.length];
         int index = 0;
         for (Object param : params) {
@@ -30,8 +30,8 @@ public class SqlExprBuilder {
                 actParams[index] = sqlExpr.getQualifyExpr();
             }else if(param instanceof ConditionExpr){
                 ConditionExpr expr = (ConditionExpr)param;
-                sqlParams.addAll(expr.getParams());
-                actParams[index] = expr.getExpression();
+                sqlParams.addAll(MBHelper.getParams(expr));
+                actParams[index] = MBHelper.getExpression(expr);
             } else if(param instanceof TimeField) {
                 actParams[index] = ((TimeField)param).name();
             }else if(param instanceof Collection){
@@ -52,7 +52,7 @@ public class SqlExprBuilder {
         String expression = exprEnum.expr();
         List<Object> sqlParams = new ArrayList<>(10);
         if (params.length > 0) {
-            String[] actParams = parseColumn(sqlParams,params);
+            String[] actParams = parseParam(sqlParams,params);
             if (exprEnum == ExprEnum.CASE_SWITCH || exprEnum == ExprEnum.CASE_CONDITION) {
                 int starIndex = 0;
                 if (exprEnum == ExprEnum.CASE_SWITCH) {
@@ -98,7 +98,7 @@ public class SqlExprBuilder {
         List<Object> sqlParams = new ArrayList<>(10);
         String expression = exprEnum.expr();
         if(exprEnum.count()>0 && params.length>0){
-            String[] actParams = parseColumn(sqlParams,params);
+            String[] actParams = parseParam(sqlParams,params);
             expression = String.format(expression,(Object[])actParams);
         }
         String groupby = "partition by ";
@@ -131,8 +131,8 @@ public class SqlExprBuilder {
                 strParam = expr.getQualifyExpr();
             }else if(param instanceof SqlQuery){
                 SqlQuery sqlQuery = (SqlQuery)param;
-                params.addAll(sqlQuery.getParams());
-                strParam = sqlQuery.getSqlStatement();
+                params.addAll(MBHelper.getParams(sqlQuery));
+                strParam = MBHelper.getSqlStatement(sqlQuery);
             }
         }
         String operator = sqlOperator.operator();
@@ -180,7 +180,7 @@ public class SqlExprBuilder {
         }else{
             builder.append(operator);
         }
-        return new ConditionExpr(builder.toString(),params);
+        return MBHelper.newConditionExpr(builder.toString(),params);
     }
 
     /** 构建update的赋值set表达式 */

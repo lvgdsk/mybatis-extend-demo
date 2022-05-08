@@ -14,8 +14,4 @@ public class SqlBuilder {
     public static UpdateBuilder update(SqlTaBle sqlTaBle){
         return UpdateBuilder.update(sqlTaBle);
     }
-
-    public static DeleteBuilder delete(SqlTaBle sqlTaBle){
-        return DeleteBuilder.delete(sqlTaBle);
-    }
 }

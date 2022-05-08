@@ -16,6 +16,7 @@ public class QProduct extends SqlTaBle {
 	public final QColumn price;
 	public final QColumn stock;
 	public final QColumn categoryId;
+	public final QColumn status;
 
     public QProduct() {
         this(null);
@@ -28,6 +29,7 @@ public class QProduct extends SqlTaBle {
 		this.price = new QColumn(tableAlias,"price",columnPrefix==null?null:columnPrefix+"price");
 		this.stock = new QColumn(tableAlias,"stock",columnPrefix==null?null:columnPrefix+"stock");
 		this.categoryId = new QColumn(tableAlias,"category_id",columnPrefix==null?null:columnPrefix+"category_id");
+		this.status = new QColumn(tableAlias,"status",columnPrefix==null?null:columnPrefix+"status");
     }
 
 	protected String getTableName() {
@@ -39,6 +41,6 @@ public class QProduct extends SqlTaBle {
 	}
 
     protected List<SqlExpr> getQColumns() {
-        return Arrays.asList(id,name,price,stock,categoryId);
+        return Arrays.asList(id,name,price,stock,categoryId,status);
     }
 }

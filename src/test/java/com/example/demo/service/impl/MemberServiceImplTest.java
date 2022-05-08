@@ -5,7 +5,7 @@ import com.example.demo.entity.Member;
 import com.example.demo.mapper.MemberMapper;
 import com.example.demo.mapper.OrderMapper;
 import com.example.demo.mapper.ProductCategoryMapper;
-import com.example.demo.mbextend.ExprUtil;
+import com.example.demo.mbextend.utils.ExprUtil;
 import com.example.demo.mbextend.SqlQuery;
 import com.example.demo.mbextend.builder.SqlBuilder;
 import com.example.demo.mbextend.markentity.QMember;
@@ -32,7 +32,9 @@ class MemberServiceImplTest {
     @Test
     void testSimplyQuery(){
         QMember qMember = new QMember();
-        SqlQuery sqlQuery = SqlBuilder.query(qMember).where(qMember.username.eq("aaa")).build();
+        SqlQuery sqlQuery = SqlBuilder.query(qMember)
+                .where(qMember.username.eq("小月"))
+                .build();
         List<Member> members = memberMapper.select(sqlQuery);
         System.out.println(JSON.toJSONString(members));
     }
@@ -77,6 +79,7 @@ class MemberServiceImplTest {
         SqlQuery sqlQuery2 = SqlBuilder.query(qMember)
                 .where(qMember.username.eq("bbb"))
                 .build();
+
 
         List<Member> members = memberMapper.select(sqlQuery1.union(sqlQuery2));
         System.out.println(JSON.toJSONString(members));

@@ -27,7 +27,7 @@ public class QueryBuilder {
     private boolean hadEndFrom;
 
     private QueryBuilder(SqlTaBle sqlTaBle) {
-        this.queryTables.add(new QueryTable(sqlTaBle));
+        queryTables.add(new QueryTable(sqlTaBle));
     }
 
     static QueryBuilder from(SqlTaBle sqlTaBle){
@@ -66,9 +66,9 @@ public class QueryBuilder {
         }
         for (SqlTaBle sqlTaBle : sqlTaBles) {
             if(sqlTaBle instanceof SqlQuery){
-                ((SqlQuery)sqlTaBle).changeColumn();
+                MBHelper.changeColumn((SqlQuery)sqlTaBle);
             }
-            MBUtil.getQColumns(sqlTaBle).forEach(sf -> {
+            MBHelper.getQColumns(sqlTaBle).forEach(sf -> {
                 if (!this.queryColumns.contains(sf)) {
                     this.queryColumns.add(sf);
                 }

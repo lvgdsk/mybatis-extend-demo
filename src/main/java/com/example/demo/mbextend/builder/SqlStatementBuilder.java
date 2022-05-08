@@ -33,26 +33,26 @@ public class SqlStatementBuilder {
         buildOrderBy(builder, queryBuilder.getQueryOrders(),params);
         // 构建limit子句
         buildLimit(builder, queryBuilder);
-        return new SqlQuery(builder.toString(),cteStatement,params,cteParams,queryBuilder.getQueryColumns());
+        return MBHelper.newSqlQuery(builder.toString(),cteStatement,params,cteParams,queryBuilder.getQueryColumns());
     }
 
     private static String buildCte(QueryBuilder queryBuilder, List<Object> params){
         List<SqlQuery> ctes = queryBuilder.getQueryTables().stream().filter(sft -> {
             SqlTaBle sqlTaBle = sft.getSqlTaBle();
-            return sqlTaBle instanceof SqlQuery && ((SqlQuery) sqlTaBle).isCte();
+            return sqlTaBle instanceof SqlQuery && MBHelper.isCte((SqlQuery)sqlTaBle);
         }).map(sft-> (SqlQuery)sft.getSqlTaBle()).collect(Collectors.toList());
         if(ctes.isEmpty()){
             return null;
         }
         return ctes.stream().map(cte -> {
             StringBuilder cteItem = new StringBuilder();
-            if (MBUtil.isRecursive(cte)) {
+            if (MBHelper.isRecursive(cte)) {
                 cteItem.append("recursive ");
             }
-            params.addAll(cte.getParams());
-            cteItem.append(cte.getTableAlias())
+            params.addAll(MBHelper.getParams(cte));
+            cteItem.append(MBHelper.getTableAlias(cte))
                     .append(" as ")
-                    .append(cte.getSqlStatement());
+                    .append(MBHelper.getSqlStatement(cte));
             return cteItem;
         }).collect(Collectors.joining(","));
     }
@@ -88,17 +88,17 @@ public class SqlStatementBuilder {
             if(joinType!=null){
                 builder.append(" ").append(joinType.value());
             }
-            if(sqlTaBle instanceof SqlQuery && !((SqlQuery)sqlTaBle).isCte()){
-                params.addAll(((SqlQuery)sqlTaBle).getParams());
+            if(sqlTaBle instanceof SqlQuery && !MBHelper.isCte((SqlQuery)sqlTaBle)){
+                params.addAll(MBHelper.getParams((SqlQuery)sqlTaBle));
             }
-            builder.append(" ").append(MBUtil.getTableName(sqlTaBle));
-            String tableAlias = MBUtil.getTableAlias(sqlTaBle);
-            if(tableAlias!=null && (!(sqlTaBle instanceof SqlQuery) || !((SqlQuery)sqlTaBle).isCte())){
+            builder.append(" ").append(MBHelper.getTableName(sqlTaBle));
+            String tableAlias = MBHelper.getTableAlias(sqlTaBle);
+            if(tableAlias!=null && (!(sqlTaBle instanceof SqlQuery) || !MBHelper.isCte((SqlQuery)sqlTaBle))){
                 builder.append(" as ").append(tableAlias);
             }
             if(joinCondition!=null){
-                params.addAll(joinCondition.getParams());
-                builder.append(" on ").append(joinCondition.getExpression());
+                params.addAll(MBHelper.getParams(joinCondition));
+                builder.append(" on ").append(MBHelper.getExpression(joinCondition));
             }
         });
     }
@@ -108,8 +108,8 @@ public class SqlStatementBuilder {
         if(conditionExprList!=null && !conditionExprList.isEmpty()){
             builder.append(" where ").append(
                     conditionExprList.stream().map(expr->{
-                    params.addAll(expr.getParams());
-                    return expr.getExpression();
+                    params.addAll(MBHelper.getParams(expr));
+                    return MBHelper.getExpression(expr);
                 }).collect(Collectors.joining(" and ")));
         }
     }
@@ -165,16 +165,5 @@ public class SqlStatementBuilder {
         params.addAll(updateBuilder.getParams());
         builder.append(" set ")
                 .append(String.join(",",updateBuilder.getSqlSets()));
-    }
-
-    /** 构建delete sql语句 */
-    public static SqlDelete buildDelete(DeleteBuilder deleteBuilder){
-        StringBuilder builder = new StringBuilder();
-        List<Object> params = new ArrayList<>(10);
-        builder.append("delete from ")
-                .append(MBUtil.getTableName(deleteBuilder.getSqlTaBle()));
-        // 构建where子句
-        buildWhere(builder, deleteBuilder.getWhereConditions(),params);
-        return new SqlDelete(builder.toString(),params);
     }
 }

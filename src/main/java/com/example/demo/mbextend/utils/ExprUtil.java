@@ -1,5 +1,9 @@
-package com.example.demo.mbextend;
+package com.example.demo.mbextend.utils;
 
+import com.example.demo.mbextend.ArithFuncExpr;
+import com.example.demo.mbextend.GroupOrderExpr;
+import com.example.demo.mbextend.QColumn;
+import com.example.demo.mbextend.SqlExprBuilder;
 import com.example.demo.mbextend.enums.ExprEnum;
 
 import java.util.List;
@@ -11,7 +15,7 @@ import java.util.List;
  */
 public class ExprUtil {
     /** 加法 */
-    public static ArithFuncExpr add(Object param1,Object param2){
+    public static ArithFuncExpr add(Object param1, Object param2){
         return SqlExprBuilder.build(ExprEnum.ADD,param1,param2);
     }
     /** 减法 */

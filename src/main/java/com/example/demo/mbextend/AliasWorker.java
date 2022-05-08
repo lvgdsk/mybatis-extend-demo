@@ -1,6 +1,7 @@
 package com.example.demo.mbextend;
 
 /**
+ * 顺序生成别名
  * @author lvqi
  * @version 1.0.0
  * @since 2022/5/7 9:58
@@ -15,7 +16,7 @@ public class AliasWorker {
         count.set(1);
     }
 
-    public static String getAlias(){
+    public synchronized static String getAlias(){
         int count = AliasWorker.count.get();
         if(count==32767){
             AliasWorker.count.set(1);

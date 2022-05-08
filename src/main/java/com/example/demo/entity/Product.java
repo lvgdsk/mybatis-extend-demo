@@ -41,5 +41,6 @@ public class Product implements Serializable {
     @TableField("category_id")
     private Long categoryId;
 
-
+    @TableField("status")
+    private Integer status;
 }

@@ -43,6 +43,4 @@ public class Order implements Serializable {
 
     @TableField("status")
     private Integer status;
-
-
 }
