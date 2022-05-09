@@ -3,6 +3,7 @@ package com.example.demo.mbextend;
 import com.example.demo.mbextend.enums.ExprEnum;
 import com.example.demo.mbextend.enums.SqlOperator;
 import com.example.demo.mbextend.enums.TimeField;
+import com.example.demo.mbextend.utils.ExprUtil;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ public class SqlExprBuilder {
             }else if(param instanceof ConditionExpr){
                 ConditionExpr expr = (ConditionExpr)param;
                 sqlParams.addAll(MBHelper.getParams(expr));
-                actParams[index] = MBHelper.getExpression(expr);
+                actParams[index] = MBHelper.getConditionExpr(expr);
             } else if(param instanceof TimeField) {
                 actParams[index] = ((TimeField)param).name();
             }else if(param instanceof Collection){
@@ -118,67 +119,93 @@ public class SqlExprBuilder {
     /** 构建条表达式 */
     public static ConditionExpr buildConditionExpr(SqlExpr sqlExpr, SqlOperator sqlOperator, Object param){
         List<Object> params = new ArrayList<>(10);
-        params.addAll(sqlExpr.getParams());
 
-        StringBuilder builder = new StringBuilder(sqlExpr.getQualifyExpr());
-        builder.append(" ");
+        StringBuilder builder = new StringBuilder();
+        if(sqlExpr!=null){
+            params.addAll(sqlExpr.getParams());
+            builder.append(sqlExpr.getQualifyExpr()).append(" ");
+        }
 
         String strParam = null;
-        if(param!=null) {
-            if (param instanceof SqlExpr) {
-                SqlExpr expr = (SqlExpr) param;
-                params.addAll(expr.getParams());
-                strParam = expr.getQualifyExpr();
-            }else if(param instanceof SqlQuery){
-                SqlQuery sqlQuery = (SqlQuery)param;
-                params.addAll(MBHelper.getParams(sqlQuery));
-                strParam = MBHelper.getSqlStatement(sqlQuery);
-            }
-        }
-        String operator = sqlOperator.operator();
         switch (sqlOperator.dist()){
             case 2:
-            case 3:
+                if (param instanceof SqlExpr) {
+                    SqlExpr expr = (SqlExpr) param;
+                    params.addAll(expr.getParams());
+                    strParam = expr.getQualifyExpr();
+                } else if (param instanceof SqlQuery) {
+                    SqlQuery sqlQuery = (SqlQuery) param;
+                    params.addAll(MBHelper.getParams(sqlQuery));
+                    strParam = MBHelper.getSqlStatement(sqlQuery);
+                }
                 if(strParam==null){
                     params.add(param);
                     strParam = "${param}";
                 }
+                break;
+            case 3:
                 switch (sqlOperator){
                     case SW:
                     case NSW:
-                        strParam += "%";
+                        if(param instanceof String){
+                            params.add(param+"%");
+                        }else{
+                            ArithFuncExpr concat = ExprUtil.concat(param, "%");
+                            strParam = concat.getExpression();
+                            params.addAll(concat.getParams());
+                        }
                         break;
                     case EW:
                     case NEW:
-                        strParam = "%"+strParam;
+                        if(param instanceof String){
+                            params.add("%"+param);
+                        }else{
+                            ArithFuncExpr concat = ExprUtil.concat("%", param);
+                            strParam = concat.getExpression();
+                            params.addAll(concat.getParams());
+                        }
                         break;
                     case CT:
                     case NCT:
-                        strParam = "%"+strParam+"%";
+                        if(param instanceof String){
+                            params.add("%"+param+"%");
+                        }else{
+                            ArithFuncExpr concat = ExprUtil.concat("%",param,"%");
+                            strParam = concat.getExpression();
+                            params.addAll(concat.getParams());
+                        }
                         break;
+                }
+                if(strParam==null){
+                    strParam = "${param}";
                 }
                 break;
             case 4:
-                if(!(param instanceof Collection)){
-                    throw new IllegalArgumentException("in 或 not in 的参数必须是集合");
+                if(param instanceof Collection){
+                    Collection<?> collection = (Collection<?>) param;
+                    params.addAll(collection);
+                    strParam = collection.stream().map(e->"${param}").collect(Collectors.joining(","));
+                    strParam = "(" + strParam + ")";
+                }else if(param instanceof SqlQuery){
+                    SqlQuery sqlQuery = (SqlQuery)param;
+                    params.addAll(sqlQuery.getParams());
+                    strParam = sqlQuery.getSqlStatement();
+                }else{
+                    throw new IllegalArgumentException("in条件参数类型错误");
                 }
-                Collection<?> collection = (Collection<?>) param;
-                params.addAll(collection);
-                strParam = collection.stream().map(e->"${param}").collect(Collectors.joining(","));
                 break;
             case 5:
                 if(!(param instanceof Collection)){
                     throw new IllegalArgumentException("between 或 not between 的参数必须是集合");
                 }
-                collection = (Collection<?>) param;
-                params.addAll(collection);
+                params.addAll((Collection<?>)param);
                 strParam = "${param} and ${param}";
         }
         if(sqlOperator.dist()!=1) {
             assert strParam != null;
-            builder.append(operator.replace("{}", strParam));
+            builder.append(sqlOperator.operator().replace("{}", strParam));
         }else{
-            builder.append(operator);
+            builder.append(sqlOperator.operator());
         }
         return MBHelper.newConditionExpr(builder.toString(),params);
     }

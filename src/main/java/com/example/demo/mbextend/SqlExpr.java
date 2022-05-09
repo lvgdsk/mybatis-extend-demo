@@ -56,14 +56,6 @@ public interface SqlExpr{
         return SqlExprBuilder.buildConditionExpr(this,SqlOperator.NIN,param);
     }
 
-    default ConditionExpr exists(Object param){
-        return SqlExprBuilder.buildConditionExpr(this,SqlOperator.ES,param);
-    }
-
-    default ConditionExpr notExists(Object param){
-        return SqlExprBuilder.buildConditionExpr(this,SqlOperator.NES,param);
-    }
-
     default ConditionExpr between(Object begin,Object end){
         return SqlExprBuilder.buildConditionExpr(this,SqlOperator.BT, Arrays.asList(begin,end));
     }
@@ -73,38 +65,47 @@ public interface SqlExpr{
     }
 
     default ConditionExpr startWith(Object param){
+        checkLikeParam(param);
         return SqlExprBuilder.buildConditionExpr(this,SqlOperator.SW,param);
     }
 
     default ConditionExpr notStartWith(Object param){
+        checkLikeParam(param);
         return SqlExprBuilder.buildConditionExpr(this,SqlOperator.NSW,param);
     }
 
     default ConditionExpr endWith(Object param){
+        checkLikeParam(param);
         return SqlExprBuilder.buildConditionExpr(this,SqlOperator.EW,param);
     }
 
     default ConditionExpr notEndWith(Object param){
+        checkLikeParam(param);
         return SqlExprBuilder.buildConditionExpr(this,SqlOperator.NEW,param);
     }
 
     default ConditionExpr contain(Object param){
+        checkLikeParam(param);
         return SqlExprBuilder.buildConditionExpr(this,SqlOperator.CT,param);
     }
 
     default ConditionExpr notContain(Object param){
+        checkLikeParam(param);
         return SqlExprBuilder.buildConditionExpr(this,SqlOperator.NCT,param);
     }
 
     default ConditionExpr like(Object param){
+        checkLikeParam(param);
         return SqlExprBuilder.buildConditionExpr(this,SqlOperator.LK,param);
     }
 
     default ConditionExpr notLike(Object param){
+        checkLikeParam(param);
         return SqlExprBuilder.buildConditionExpr(this,SqlOperator.NLK,param);
     }
 
     default ConditionExpr regexp(Object param){
+        checkLikeParam(param);
         return SqlExprBuilder.buildConditionExpr(this,SqlOperator.REG,param);
     }
 
@@ -122,5 +123,11 @@ public interface SqlExpr{
 
     default GroupOrderExpr groupDesc(){
         return new GroupOrderExpr(getQualifyExpr()+ " desc",getParams());
+    }
+
+    default void checkLikeParam(Object param){
+        if(!(param instanceof QColumn || param instanceof String)){
+            throw new IllegalArgumentException("不支持的参数类型");
+        }
     }
 }

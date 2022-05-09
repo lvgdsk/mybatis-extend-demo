@@ -1,10 +1,8 @@
 package com.example.demo.mbextend.utils;
 
-import com.example.demo.mbextend.ArithFuncExpr;
-import com.example.demo.mbextend.GroupOrderExpr;
-import com.example.demo.mbextend.QColumn;
-import com.example.demo.mbextend.SqlExprBuilder;
+import com.example.demo.mbextend.*;
 import com.example.demo.mbextend.enums.ExprEnum;
+import com.example.demo.mbextend.enums.SqlOperator;
 
 import java.util.List;
 
@@ -14,6 +12,15 @@ import java.util.List;
  * @since 2022/5/7 17:33
  */
 public class ExprUtil {
+
+    public static ConditionExpr exists(SqlQuery sqlQuery){
+        return SqlExprBuilder.buildConditionExpr(null, SqlOperator.ES,sqlQuery);
+    }
+
+    public static ConditionExpr notExists(SqlQuery sqlQuery){
+        return SqlExprBuilder.buildConditionExpr(null,SqlOperator.NES,sqlQuery);
+    }
+
     /** 加法 */
     public static ArithFuncExpr add(Object param1, Object param2){
         return SqlExprBuilder.build(ExprEnum.ADD,param1,param2);

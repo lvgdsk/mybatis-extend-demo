@@ -41,5 +41,6 @@ public class OrderItem implements Serializable {
     @TableField("order_id")
     private Long orderId;
 
-
+    @TableField(exist = false)
+    private Product product;
 }

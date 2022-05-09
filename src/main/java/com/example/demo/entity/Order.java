@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableField;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -43,4 +44,7 @@ public class Order implements Serializable {
 
     @TableField("status")
     private Integer status;
+
+    @TableField(exist = false)
+    private List<OrderItem> orderItems;
 }

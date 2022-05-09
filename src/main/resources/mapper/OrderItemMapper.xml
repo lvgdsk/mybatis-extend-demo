@@ -9,6 +9,13 @@
         <result column="number" property="number" />
         <result column="price" property="price" />
         <result column="order_id" property="orderId" />
+        <association property="product" javaType="com.example.demo.entity.Product" columnPrefix="pro_">
+            <id property="id" column=""/>
+            <result column="name" property="name" />
+            <result column="price" property="price" />
+            <result column="stock" property="stock" />
+            <result column="category_id" property="categoryId" />
+        </association>
     </resultMap>
 
     <!-- 通用查询结果列 -->

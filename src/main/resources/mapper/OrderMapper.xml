@@ -9,6 +9,13 @@
         <result column="member_id" property="memberId" />
         <result column="total_price" property="totalPrice" />
         <result column="status" property="status" />
+        <collection property="createTime" ofType="com.example.demo.entity.OrderItem" columnPrefix="item">
+            <id property="id" column="id"/>
+            <result property="orderId" column="order_id"/>
+            <result property="productId" column="product_id"/>
+            <result property="price" column="price"/>
+            <result property="number" column="number"/>
+        </collection>
     </resultMap>
 
     <!-- 通用查询结果列 -->

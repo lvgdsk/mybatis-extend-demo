@@ -27,7 +27,9 @@ public class QueryBuilder {
     private boolean hadEndFrom;
 
     private QueryBuilder(SqlTaBle sqlTaBle) {
-        queryTables.add(new QueryTable(sqlTaBle));
+        if(sqlTaBle!=null) {
+            queryTables.add(new QueryTable(sqlTaBle));
+        }
     }
 
     static QueryBuilder from(SqlTaBle sqlTaBle){

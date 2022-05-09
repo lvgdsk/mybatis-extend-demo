@@ -48,8 +48,12 @@ public class MBHelper {
         return expr.getParams();
     }
 
-    public static String getExpression(ConditionExpr expr) {
+    public static String getConditionExpr(ConditionExpr expr) {
         return expr.getExpression();
+    }
+
+    public static String getBracketExpression(ConditionExpr expr) {
+        return expr.getBracketExpression();
     }
 
     public static ConditionExpr newConditionExpr(String condition,List<Object> params){

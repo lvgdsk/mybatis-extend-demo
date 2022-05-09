@@ -9,6 +9,7 @@
         <result column="phone" property="phone" />
         <result column="birthday" property="birthday" />
         <result column="gender" property="gender" />
+        <result property="money" column="money"/>
         <collection property="orders" ofType="com.example.demo.entity.Order" columnPrefix="ord_">
             <id column="id" property="id"/>
             <result column="status" property="status"/>

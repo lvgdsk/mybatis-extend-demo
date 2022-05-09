@@ -12,9 +12,8 @@ import java.util.List;
  */
 public class ConditionExpr{
     private String expression;
-    private boolean isNeedBracket;
     private final List<Object> params;
-
+    private boolean isNeedBracket;
     ConditionExpr(String condition,List<Object> params) {
         this.expression = condition;
         this.params = params;
@@ -48,44 +47,40 @@ public class ConditionExpr{
     }
 
     private ConditionExpr combineCondition(ConditionCombineType combineType, ConditionExpr sqlCondition){
-        String condition1 = this.expression;
-        String condition2 = sqlCondition.getExpression();
-        if(this.isNeedBracket){
-            condition1 = "( " + condition1 + " )";
-        }
-        if(this.isNeedBracket){
-            condition2 = "( " + condition2 + " )";
-        }
-        String logicSymbol;
+        String condition;
         boolean isNeedBracket = true;
         switch (combineType){
             case AND:
-                logicSymbol = " and ";
+                condition = this.getBracketExpression()+" and "+sqlCondition.getBracketExpression();
                 isNeedBracket = false;
                 break;
             case OR:
-                logicSymbol = " or ";
+                condition = this.expression+" or "+sqlCondition.expression;
                 break;
             case XOR:
-                logicSymbol = " xor ";
+                condition = this.expression+" xor "+sqlCondition.expression;
                 break;
             default:
                 throw new IllegalArgumentException("不支持的条件结合类型");
         }
-        List<Object> params = new ArrayList<>(this.params.size()+sqlCondition.getParams().size());
+        List<Object> params = new ArrayList<>(this.params.size()+sqlCondition.params.size());
         params.addAll(this.params);
-        params.addAll(sqlCondition.getParams());
-        ConditionExpr conditionExpr = new ConditionExpr(condition1 + logicSymbol + condition2, params);
-        conditionExpr.setNeedBracket(isNeedBracket);
-        return conditionExpr;
+        params.addAll(sqlCondition.params);
+        ConditionExpr expr = new ConditionExpr(condition, params);
+        expr.isNeedBracket = isNeedBracket;
+        return expr;
     }
 
     String getExpression() {
         return expression;
     }
 
-    private void setNeedBracket(boolean needBracket) {
-        isNeedBracket = needBracket;
+    String getBracketExpression(){
+        if(isNeedBracket){
+            return "("+expression+")";
+        }else{
+            return expression;
+        }
     }
 
     List<Object> getParams() {

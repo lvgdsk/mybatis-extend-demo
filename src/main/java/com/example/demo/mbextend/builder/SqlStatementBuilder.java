@@ -76,8 +76,10 @@ public class SqlStatementBuilder {
 
     /** 构建from子句 */
     private static void buildFrom(StringBuilder builder, QueryBuilder queryBuilder,List<Object> params){
-        builder.append(" from");
-        buildFromOrUpdate(builder,queryBuilder.getQueryTables(),params);
+        if(!queryBuilder.getQueryTables().isEmpty()) {
+            builder.append(" from");
+            buildFromOrUpdate(builder, queryBuilder.getQueryTables(), params);
+        }
     }
 
     private static void buildFromOrUpdate(StringBuilder builder, List<QueryTable> queryTables, List<Object> params){
@@ -98,7 +100,7 @@ public class SqlStatementBuilder {
             }
             if(joinCondition!=null){
                 params.addAll(MBHelper.getParams(joinCondition));
-                builder.append(" on ").append(MBHelper.getExpression(joinCondition));
+                builder.append(" on ").append(MBHelper.getConditionExpr(joinCondition));
             }
         });
     }
@@ -109,7 +111,11 @@ public class SqlStatementBuilder {
             builder.append(" where ").append(
                     conditionExprList.stream().map(expr->{
                     params.addAll(MBHelper.getParams(expr));
-                    return MBHelper.getExpression(expr);
+                    if(conditionExprList.size()==1) {
+                        return MBHelper.getConditionExpr(expr);
+                    }else{
+                        return MBHelper.getBracketExpression(expr);
+                    }
                 }).collect(Collectors.joining(" and ")));
         }
     }

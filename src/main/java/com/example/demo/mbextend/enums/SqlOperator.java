@@ -46,9 +46,9 @@ public enum SqlOperator {
     // 不包含
     NCT(3,"not like {}"),
     // 在其中
-    IN(4,"in ({})"),
+    IN(4,"in {}"),
     // 不在其中
-    NIN(4,"not in ({})"),
+    NIN(4,"not in {}"),
     // 在其间
     BT(5,"between {}"),
     // 不在其间

@@ -3,6 +3,8 @@ package com.example.demo.entity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableField;
 import java.io.Serializable;
@@ -43,6 +45,9 @@ public class Member implements Serializable {
 
     @TableField("gender")
     private String gender;
+
+    @TableField("money")
+    private BigDecimal money;
 
     @TableField(exist = false)
     private List<Order> orders;
