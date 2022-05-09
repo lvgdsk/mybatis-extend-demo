@@ -51,11 +51,11 @@ public class MybatisPlusCodeGenerator{
 
         // 数据源配置
         DataSourceConfig dsc = new DataSourceConfig();
-        dsc.setUrl("jdbc:mysql://10.16.93.81:3306/test?serverTimeZone=Asia/Shanghai");
+        dsc.setUrl("jdbc:mysql://192.168.178.128:3306/test?serverTimeZone=Asia/Shanghai");
         // dsc.setSchemaName("public");
         dsc.setDriverName("com.mysql.cj.jdbc.Driver");
-        dsc.setUsername("health");
-        dsc.setPassword("txYo71aRb");
+        dsc.setUsername("root");
+        dsc.setPassword("123");
         mpg.setDataSource(dsc);
 
         // 包配置

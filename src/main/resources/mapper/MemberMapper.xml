@@ -10,6 +10,7 @@
         <result column="birthday" property="birthday" />
         <result column="gender" property="gender" />
         <result property="money" column="money"/>
+        <result property="address" column="address"/>
         <collection property="orders" ofType="com.example.demo.entity.Order" columnPrefix="ord_">
             <id column="id" property="id"/>
             <result column="status" property="status"/>
@@ -17,10 +18,4 @@
             <result column="total_price" property="totalPrice"/>
         </collection>
     </resultMap>
-
-    <!-- 通用查询结果列 -->
-    <sql id="Base_Column_List">
-        id, username, phone, birthday, gender
-    </sql>
-
 </mapper>
