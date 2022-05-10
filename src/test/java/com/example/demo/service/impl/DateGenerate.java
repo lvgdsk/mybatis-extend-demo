@@ -10,6 +10,7 @@ import com.example.demo.mbextend.builder.SqlBuilder;
 import com.example.demo.mbextend.markentity.QChinaRegion;
 import com.example.demo.mbextend.markentity.QMember;
 import com.example.demo.mbextend.markentity.QProduct;
+import com.example.demo.service.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,9 +42,19 @@ public class DateGenerate {
     @Autowired
     ChinaRegionMapper chinaRegionMapper;
 
+    @Autowired
+    IChinaRegionService regionService;
+    @Autowired
+    IMemberService memberService;
+    @Autowired
+    IOrderService orderService;
+    @Autowired
+    IOrderItemService itemService;
+    @Autowired
+    IProductService productService;
 
     @Test
-    void generateChinaRegion() throws FileNotFoundException {
+    void generateChinaRegion(){
         File file = new File("src/main/resources/china_region.txt");
         FileReader fileReader = new FileReader(file);
         String result = fileReader.readString();
@@ -108,7 +119,7 @@ public class DateGenerate {
     }
 
     @Test
-    void generateChinaRegion1() throws IOException {
+    void generateChinaRegion1(){
         File file = new File("src/main/resources/region.txt");
         FileReader fileReader = new FileReader(file);
         List<String> regions = fileReader.readLines();
@@ -145,7 +156,7 @@ public class DateGenerate {
             region.setType(1);
             return region;
         }).collect(Collectors.toList());
-        provinceList.forEach(e-> chinaRegionMapper.insert(e));
+        regionService.saveBatch(provinceList);
 
         provinceList.forEach(p->{
             List<EbPlace> ebPlaces1 = cityGroup.get("1" + p.getRegionCode());
@@ -161,8 +172,7 @@ public class DateGenerate {
                     region.setPid(p.getId());
                     return region;
                 }).collect(Collectors.toList());
-
-                cityList.forEach(e -> chinaRegionMapper.insert(e));
+                regionService.saveBatch(cityList);
 
                 cityList.forEach(c -> {
                     List<EbPlace> ebPlaces2 = districtGroup.get("1" + c.getRegionCode());
@@ -178,8 +188,7 @@ public class DateGenerate {
                             region.setPid(c.getId());
                             return region;
                         }).collect(Collectors.toList());
-
-                        districtList.forEach(e -> chinaRegionMapper.insert(e));
+                        regionService.saveBatch(districtList);
 
                         districtList.forEach(d -> {
                             List<EbPlace> ebPlaces3 = streetGroup.get("1" + d.getRegionCode());
@@ -195,8 +204,7 @@ public class DateGenerate {
                                     region.setPid(d.getId());
                                     return region;
                                 }).collect(Collectors.toList());
-
-                                streetList.forEach(e -> chinaRegionMapper.insert(e));
+                                regionService.saveBatch(streetList);
                             }
                         });
                     }
@@ -208,23 +216,24 @@ public class DateGenerate {
     /**
      * 生成用户数据
      */
-    @Test
-    void generateMember(){
+    private void generateMember(int count){
         Random random = new Random();
         List<String> phoneStart = Arrays.asList("134","135","136","137","138","139","150","151","152","158","159","157","187","188","147","130","131","132","155","156","185","186","133","153","180","189");
-        List<String> randAddressList = getRandAddressList(1000);
-        for (int i = 0; i < 1000; i++) {
+        List<String> randAddressList = getRandAddressList(count);
+        List<Member> memberList = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
             Member member = new Member();
+            memberList.add(member);
             member.setUsername("user-"+i);
             member.setBirthday(generateBirthday(10));
             member.setGender(random.nextInt(2)==0?"M":"F");
             member.setPhone(phoneStart.get(random.nextInt(phoneStart.size()))+(random.nextInt(90000000)+10000000));
-            member.setMoney(new BigDecimal(random.nextInt(1000000)+10000));
+            member.setMoney(new BigDecimal(100000));
             String[] region = randAddressList.get(i).split(":");
-            member.setAddressName(region[0]);
-            member.setAddressCode(region[1]);
-            memberMapper.insert(member);
+            member.setAddressCode(region[0]);
+            member.setAddressName(region[1]);
         }
+        memberService.saveBatch(memberList);
     }
 
     private List<String> getRandAddressList(int count){
@@ -293,84 +302,108 @@ public class DateGenerate {
         return calendar.getTime();
     }
 
-
-    @Test
-    void generateOrder(){
+    private void generateOrder(int count)  {
         QMember qMember = new QMember();
         List<Member> members = memberMapper.select(SqlBuilder.query(qMember).build());
         QProduct qProduct = new QProduct();
         List<Product> products = productMapper.select(SqlBuilder.query(qProduct).build());
+
         Random random = new Random();
 
-        for (int i = 0; i < 1; i++) {
-            List<String> addressList = getRandAddressList(1000);
-            for (int j = 0; j < 1000; j++) {
-                Member member = members.get(random.nextInt(members.size()));
-                Order order = new Order();
-                order.setId(IdWorker.getIdStr());
-
-                BigDecimal totalPrice = new BigDecimal(0);
-                int itemCount = random.nextInt(5) + 1;
-                List<OrderItem> items = new ArrayList<>(itemCount);
-                for (int k = 0; k < itemCount; k++) {
-                    Product product;
-                    int productCount = 1;
-                    int percent = random.nextInt(5);
-                    if(percent==4) {
-                        productCount = random.nextInt(5)+1;
-                    }
-                    int tryCount = 5;
-                    while (true){
-                        product = products.get(random.nextInt(products.size()));
-                        if(product.getStock()>0 && product.getStatus()==1){
-                            if(product.getStock()<productCount){
-                                productCount = product.getStock();
-                            }
-                            break;
+        List<Order> orderList = new ArrayList<>(count);
+        List<OrderItem> orderItemList = new ArrayList<>(count*5);
+        for (int j = 0; j < count; j++) {
+            Member member = members.get(random.nextInt(members.size()));
+            Order order = new Order();
+            orderList.add(order);
+            order.setId(IdWorker.getIdStr());
+            BigDecimal totalPrice = new BigDecimal(0);
+            int itemCount = random.nextInt(5) + 1;
+            for (int k = 0; k < itemCount; k++) {
+                Product product;
+                int productCount = 1;
+                int percent = random.nextInt(5);
+                if(percent==4) {
+                    productCount = random.nextInt(5)+1;
+                }
+                int tryGet = 5;
+                while (true){
+                    product = products.get(random.nextInt(products.size()));
+                    if(product.getStock()>0 && product.getStatus()==1){
+                        if(product.getStock()<productCount){
+                            productCount = product.getStock();
                         }
+                        break;
+                    }
+                    tryGet--;
+                    if(tryGet==0){
                         product = null;
-                        tryCount--;
-                        if(tryCount==0){
-                            break;
-                        }
-                    }
-                    if(product!=null){
-                        OrderItem item = new OrderItem();
-                        item.setOrderId(order.getId());
-                        BigDecimal price = product.getPrice().multiply(new BigDecimal(productCount));
-                        totalPrice = totalPrice.add(price);
-                        item.setPrice(price);
-                        item.setNumber(productCount);
-                        item.setProductId(product.getId());
-                        items.add(item);
+                        break;
                     }
                 }
-                if(totalPrice.compareTo(new BigDecimal(0))>0) {
-                    String[] region = addressList.get(j).split(":");
-                    order.setAddressCode(region[0]);
-                    order.setAddressName(region[1]);
-                    order.setCreateTimes(getRandDate(member.getBirthday()));
-                    order.setMemberId(member.getId());
-                    order.setTotalPrice(totalPrice);
-                    if(totalPrice.compareTo(member.getMoney())<0){
-                        order.setStatus(1);
+                if(product!=null){
+                    OrderItem item = new OrderItem();
+                    item.setOrderId(order.getId());
+                    BigDecimal price = product.getPrice().multiply(new BigDecimal(productCount));
+                    totalPrice = totalPrice.add(price);
+                    item.setPrice(price);
+                    item.setNumber(productCount);
+                    item.setProductId(product.getId());
+                    orderItemList.add(item);
+                    product.setStock(product.getStock()-productCount);
+                }
+            }
+            if(totalPrice.compareTo(new BigDecimal(0))>0) {
+                order.setAddressCode(member.getAddressCode());
+                order.setAddressName(member.getAddressName());
+                order.setCreateTime(getRandDate(member.getBirthday()));
+                order.setMemberId(member.getId());
+                order.setTotalPrice(totalPrice);
+                if(totalPrice.compareTo(member.getMoney())>0){
+                    order.setStatus(1);
+                }else{
+                    int percent = random.nextInt(7);
+                    int status;
+                    if(percent==0) {
+                        status = random.nextInt(8) + 1;
                     }else{
-                        int percent = random.nextInt(5);
-                        if(percent==4) {
-                            order.setStatus(random.nextInt(9) + 1);
-                        }else{
-                            order.setStatus(7);
-                        }
+                        status = 6;
                     }
-                    orderMapper.insert(order);
-                    items.forEach(e->orderItemMapper.insert(e));
+                    if(status == 6){
+                        member.setMoney(member.getMoney().subtract(totalPrice));
+                    }
+                    order.setStatus(status);
                 }
             }
         }
+        orderService.saveBatch(orderList);
+        itemService.saveBatch(orderItemList);
+
+        members.forEach(m->{
+            m.setGender(null);
+            m.setBirthday(null);
+            m.setPhone(null);
+            m.setAddressCode(null);
+            m.setAddressName(null);
+            m.setUsername(null);
+        });
+        memberService.updateBatchById(members);
+
+        products.forEach(p->{
+            p.setStatus(null);
+            p.setPrice(null);
+            p.setCategoryId(null);
+            p.setName(null);
+        });
+        productService.updateBatchById(products);
     }
 
     @Test
-    void test(){
+    void generateData(){
+//        generateMember(10000);
+        for (int i = 0; i < 10; i++) {
+            generateOrder(10000);
+        }
     }
 
     private Date getRandDate(Date birthday){

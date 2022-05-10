@@ -15,7 +15,7 @@
         <collection property="orders" ofType="com.example.demo.entity.Order" columnPrefix="ord_">
             <id column="id" property="id"/>
             <result column="status" property="status"/>
-            <result column="create_time" property="createTimes"/>
+            <result column="create_time" property="createTime"/>
             <result column="total_price" property="totalPrice"/>
         </collection>
     </resultMap>

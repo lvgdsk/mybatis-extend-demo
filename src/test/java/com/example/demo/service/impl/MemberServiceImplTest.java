@@ -62,11 +62,11 @@ class MemberServiceImplTest {
         QMember qMember = new QMember();
         SqlQuery sqlQuery = SqlBuilder.query(qMember)
                 .where(qMember.birthday.between(
-                        DateUtil.parse("2011-08-00"),
-                        DateUtil.parse("2021-05-09")))
+                        DateUtil.parse("2008-08-00"),
+                        DateUtil.parse("2008-09-00")))
                 .build();
         List<Member> members = memberMapper.select(sqlQuery);
-        System.out.println(JSON.toJSONString(members));
+        members.forEach(m-> System.out.println(JSON.toJSONString(m)));
     }
 
     @Test
