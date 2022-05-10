@@ -39,7 +39,7 @@ public class OrderItem implements Serializable {
     private BigDecimal price;
 
     @TableField("order_id")
-    private Long orderId;
+    private String orderId;
 
     @TableField(exist = false)
     private Product product;

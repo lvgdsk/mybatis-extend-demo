@@ -16,6 +16,9 @@ public class QMember extends SqlTaBle {
 	public final QColumn phone;
 	public final QColumn birthday;
 	public final QColumn gender;
+	public final QColumn money;
+	public final QColumn addressCode;
+	public final QColumn addressName;
 
     public QMember() {
         this(null);
@@ -28,6 +31,9 @@ public class QMember extends SqlTaBle {
 		this.phone = new QColumn(tableAlias,"phone",columnPrefix==null?null:columnPrefix+"phone");
 		this.birthday = new QColumn(tableAlias,"birthday",columnPrefix==null?null:columnPrefix+"birthday");
 		this.gender = new QColumn(tableAlias,"gender",columnPrefix==null?null:columnPrefix+"gender");
+		this.money = new QColumn(tableAlias,"money",columnPrefix==null?null:columnPrefix+"money");
+		this.addressCode = new QColumn(tableAlias,"address_code",columnPrefix==null?null:columnPrefix+"address_code");
+		this.addressName = new QColumn(tableAlias,"address_name",columnPrefix==null?null:columnPrefix+"address_name");
     }
 
 	protected String getTableName() {
@@ -39,6 +45,6 @@ public class QMember extends SqlTaBle {
 	}
 
     protected List<SqlExpr> getQColumns() {
-        return Arrays.asList(id,username,phone,birthday,gender);
+        return Arrays.asList(id,username,phone,birthday,gender,money,addressCode,addressName);
     }
 }

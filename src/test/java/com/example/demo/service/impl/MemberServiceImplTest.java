@@ -139,7 +139,7 @@ class MemberServiceImplTest {
         SqlQuery sqlQuery = SqlBuilder.query(qMember)
                 .innerJoin(qOrder,qMember.id.eq(qOrder.memberId))
                 .where(qMember.username.eq("aaa"))
-                .where(ExprUtil.year(qOrder.createTime).eq(2022))
+                .where(ExprUtil.year(qOrder.createTimes).eq(2022))
                 .build();
         List<Member> members = memberMapper.select(sqlQuery);
         System.out.println(JSON.toJSONString(members));
@@ -155,7 +155,7 @@ class MemberServiceImplTest {
 
         QOrder qOrder = new QOrder();
         SqlQuery sqlQuery2 = SqlBuilder.query(qOrder)
-                .select(qOrder.id, qOrder.createTime)
+                .select(qOrder.id, qOrder.createTimes)
                 .where(qOrder.memberId.eq(sqlQuery1))
                 .build();
         List<Order> orders = orderMapper.select(sqlQuery2);
@@ -172,7 +172,7 @@ class MemberServiceImplTest {
 
         QOrder qOrder = new QOrder();
         SqlQuery sqlQuery2 = SqlBuilder.query(qOrder)
-                .select(qOrder.id, qOrder.createTime)
+                .select(qOrder.id, qOrder.createTimes)
                 .where(qOrder.memberId.in(sqlQuery1))
                 .build();
         List<Order> orders = orderMapper.select(sqlQuery2);

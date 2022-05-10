@@ -29,9 +29,21 @@ public class ChinaRegion implements Serializable {
     @TableField("pid")
     private Integer pid;
 
-    @TableField("region")
-    private String region;
+    @TableField("region_name")
+    private String regionName;
 
     @TableField("type")
     private Integer type;
+
+    @TableField("post_code")
+    private String postCode;
+
+    @TableField("region_code")
+    private String regionCode;
+
+    @TableField("longitude")
+    private String longitude;
+
+    @TableField("latitude")
+    private String latitude;
 }

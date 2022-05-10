@@ -12,10 +12,12 @@ public class QOrder extends SqlTaBle {
 	private final String tableAlias;
 
     public final QColumn id;
-	public final QColumn createTime;
+	public final QColumn createTimes;
 	public final QColumn memberId;
 	public final QColumn totalPrice;
 	public final QColumn status;
+	public final QColumn addressName;
+	public final QColumn addressCode;
 
     public QOrder() {
         this(null);
@@ -24,10 +26,12 @@ public class QOrder extends SqlTaBle {
 	public QOrder(String columnPrefix) {
 	    tableAlias = AliasWorker.getAlias();
         this.id = new QColumn(tableAlias,"id",columnPrefix==null?null:columnPrefix+"id");
-		this.createTime = new QColumn(tableAlias,"create_time",columnPrefix==null?null:columnPrefix+"create_time");
+		this.createTimes = new QColumn(tableAlias,"create_times",columnPrefix==null?null:columnPrefix+"create_times");
 		this.memberId = new QColumn(tableAlias,"member_id",columnPrefix==null?null:columnPrefix+"member_id");
 		this.totalPrice = new QColumn(tableAlias,"total_price",columnPrefix==null?null:columnPrefix+"total_price");
 		this.status = new QColumn(tableAlias,"status",columnPrefix==null?null:columnPrefix+"status");
+		this.addressName = new QColumn(tableAlias,"address_name",columnPrefix==null?null:columnPrefix+"address_name");
+		this.addressCode = new QColumn(tableAlias,"address_code",columnPrefix==null?null:columnPrefix+"address_code");
     }
 
 	protected String getTableName() {
@@ -39,6 +43,6 @@ public class QOrder extends SqlTaBle {
 	}
 
     protected List<SqlExpr> getQColumns() {
-        return Arrays.asList(id,createTime,memberId,totalPrice,status);
+        return Arrays.asList(id,createTimes,memberId,totalPrice,status,addressName,addressCode);
     }
 }

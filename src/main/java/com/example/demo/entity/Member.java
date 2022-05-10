@@ -49,8 +49,11 @@ public class Member implements Serializable {
     @TableField("money")
     private BigDecimal money;
 
-    @TableField("address")
-    private String address;
+    @TableField("address_code")
+    private String addressCode;
+
+    @TableField("address_name")
+    private String addressName;
 
     @TableField(exist = false)
     private List<Order> orders;

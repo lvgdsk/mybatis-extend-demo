@@ -31,7 +31,7 @@ public class EntityMarkGenerator {
     // 扩展包路径
     private static final String mbextend = "com/example/demo/mbextend";
     // 要生成标记类的实体类对象
-    private static final List<Class<?>> entityClasses = Arrays.asList(Member.class,Order.class,OrderItem.class,Product.class,ProductCategory.class);
+    private static final List<Class<?>> entityClasses = Arrays.asList(Order.class);
 
     public static void main(String[] args){
         String extendPath = sourceDir+mbextend;
